@@ -1,0 +1,29 @@
+#!/bin/bash
+# i3-wallpaper
+# aoneill - 10/22/15
+
+userHome=$(eval echo "~$1")
+if [[ "$#" == "0" || $userHome == "~$1" ]]
+then
+  home=$HOME
+else
+  home=$userHome
+fi
+
+# Photo dir
+dir="$home/dropbox/Images/Wallpapers/Computer"
+
+# File and path
+cd "$dir"
+path="$(find . -type f | sort -R | head -n 1)"
+mode=$(echo $path | sed -e 's|\./\([0-9]\+\)/.*|\1|g')
+file=$(echo $path | sed -e 's|\./[0-9]\+/\(.*\)|\1|g')
+
+# Export config
+echo "[:0.0]
+file=$dir/$mode/$file
+mode=$mode
+bgcolor=#000000" > "$home/.config/nitrogen/bg-saved.cfg"
+
+# Reload nitrogen
+nitrogen --restore
