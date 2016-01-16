@@ -1,0 +1,8 @@
+#!/bin/bash
+# 10-localbin.setup
+# aoneill - 01/15/16
+
+folder=$(basename "$0" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g")
+localbin=/usr/local/bin/
+
+cp -r "$folder/*" "$localbin"

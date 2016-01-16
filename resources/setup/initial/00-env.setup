@@ -1,0 +1,18 @@
+#!/bin/bash
+
+folder=$(basename "$0" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g")
+
+env=~/.env
+git=git
+db=dropbox
+
+mkdir -p "$env/$db"
+
+git clone https://github.com/alexoneill/config.git "$env/$git"
+
+cat "$folder/links" | while IFS= read -r line; do
+  link=$(echo $line | awk '{ print $1; }')
+  src=$(echo $line | awk '{ print $2; }')
+
+  eval "ln -s $src $link"
+done

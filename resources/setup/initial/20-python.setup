@@ -1,0 +1,11 @@
+#!/bin/bash
+# 20-python.setup
+# aoneill - 01/15/16
+
+folder=$(basename "$0" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g")
+
+python=/usr/bin/python
+python27=/usr/bin/python2.7
+
+rm "$python"
+ln -s "$python27" "$python"

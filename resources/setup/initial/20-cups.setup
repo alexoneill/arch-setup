@@ -1,0 +1,18 @@
+#!/bin/bash
+# cups.setup
+# aoneill - 01/15/16
+
+folder=$(basename "$0" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g")
+
+systemctl enable org.cups.cupsd.service
+systemctl start org.cups.cupsd.service
+
+cat "$folder/printers" | IFS= read -r line; do
+  printer=$(echo $line | awk '{ print $1; }')
+  lpd=$(echo $line | awk '{ print $2; }')
+  file=$(echo $line | awk '{ print $3; }')
+
+  lpadmin -p "$printer" -Ev "$lpd" -m "$folder/ppd/$file"
+  cupsaccept "$printer"
+  cupsenable "$printer"
+done

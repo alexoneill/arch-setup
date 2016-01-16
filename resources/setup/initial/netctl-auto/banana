@@ -1,0 +1,7 @@
+Description='Automatically generated profile by wifi-menu'
+Interface=$INTERFACE
+Connection=wireless
+Security=wpa
+ESSID=banana
+IP=dhcp
+Key=$PASSWORD

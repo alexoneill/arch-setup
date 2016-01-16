@@ -1,0 +1,16 @@
+Description='Eduroam CMU'
+Interface=$INTERFACE
+Connection=wireless
+Security=wpa-configsection
+IP=dhcp
+ESSID=eduroam
+WPAConfigSection=(
+    'ssid="eduroam"'
+    'key_mgmt=WPA-EAP'
+    'eap=TTLS'
+    'anonymous_identity="anonymous@andrew.cmu.edu"'
+    'identity="aoneill@andrew.cmu.edu"'
+    'password="$PASSWORD"'
+    'ca_cert="/etc/ssl/certs/AddTrust_External_Root.pem"'
+    'phase2="auth=MSCHAPV2"'
+)

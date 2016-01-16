@@ -1,0 +1,398 @@
+*PPD-Adobe: "4.3"
+*%
+*% For information on using this, and to obtain the required backend
+*% script, consult http://www.openprinting.org/
+*%
+*% This file is published under the GNU General Public License
+*%
+*% PPD-O-MATIC (4.0.0 or newer) generated this PPD file. It is for use with 
+*% all programs and environments which use PPD files for dealing with
+*% printer capability information. The printer must be configured with the
+*% "foomatic-rip" backend filter script of Foomatic 4.0.0 or newer. This 
+*% file and "foomatic-rip" work together to support PPD-controlled printer
+*% driver option access with all supported printer drivers and printing
+*% spoolers.
+*%
+*% To save this file on your disk, wait until the download has completed
+*% (the animation of the browser logo must stop) and then use the
+*% "Save as..." command in the "File" menu of your browser or in the 
+*% pop-up manu when you click on this document with the right mouse button.
+*% DO NOT cut and paste this file into an editor with your mouse. This can
+*% introduce additional line breaks which lead to unexpected results.
+*%
+*% You may save this file as 'HP-LaserJet_4100-Postscript.ppd'
+*%
+*%
+*FormatVersion:	"4.3"
+*FileVersion:	"1.1"
+*LanguageVersion: English 
+*LanguageEncoding: ISOLatin1
+*PCFileName:	"POSTSCRI.PPD"
+*Manufacturer:	"HP"
+*Product:	"(HP LaserJet 4100 Series)"
+*cupsVersion:	1.0
+*cupsManualCopies: True
+*cupsModelNumber:  2
+*cupsFilter:	"application/vnd.cups-postscript 100 foomatic-rip"
+*cupsFilter:	"application/vnd.cups-pdf 0 foomatic-rip"
+*%pprRIP:        foomatic-rip other
+*ModelName:     "HP LaserJet 4100"
+*ShortNickName: "HP LaserJet 4100 Postscript"
+*NickName:      "HP LaserJet 4100 Foomatic/Postscript"
+*PSVersion:	"(3010.000) 550"
+*PSVersion:	"(3010.000) 651"
+*PSVersion:	"(3010.000) 652"
+*PSVersion:	"(3010.000) 653"
+*PSVersion:	"(3010.000) 704"
+*PSVersion:	"(3010.000) 705"
+*PSVersion:	"(3010.000) 800"
+*PSVersion:	"(3010.000) 815"
+*PSVersion:	"(3010.000) 850"
+*PSVersion:	"(3010.000) 860"
+*PSVersion:	"(3010.000) 861"
+*PSVersion:	"(3010.000) 862"
+*PSVersion:	"(3010.000) 863"
+*PSVersion:	"(3010.000) 864"
+*PSVersion:	"(3010.000) 870"
+*LanguageLevel:	"3"
+*ColorDevice:	False
+*DefaultColorSpace: Gray
+*FileSystem:	False
+*Throughput:	"1"
+*LandscapeOrientation: Plus90
+*TTRasterizer:	Type42
+*1284DeviceID: "MFG:Hewlett-Packard;MDL:HP LaserJet 4100 Series;CMD:PJL,MLC,POSTSCRIPT,PCLXL,PJL,PCL;DES:Hewlett-Packard LaserJet 4100 Series;DRV:DPostscript,R0,M0,TP;"
+
+*driverName Postscript: ""
+*driverType P/PostScript: ""
+*driverUrl: "http://partners.adobe.com/public/developer/ps/index_specs.html"
+*driverObsolete: False
+*driverManufacturerSupplied: False
+
+
+
+
+*HWMargins: 18 36 18 36
+*VariablePaperSize: True
+*MaxMediaWidth: 100000
+*MaxMediaHeight: 100000
+*NonUIOrderDependency: 100 AnySetup *CustomPageSize
+*CustomPageSize True: "pop pop pop
+<</PageSize [ 5 -2 roll ] /ImagingBBox null>>setpagedevice"
+*End
+*ParamCustomPageSize Width: 1 points 36 100000
+*ParamCustomPageSize Height: 2 points 36 100000
+*ParamCustomPageSize Orientation: 3 int 0 0
+*ParamCustomPageSize WidthOffset: 4 points 0 0
+*ParamCustomPageSize HeightOffset: 5 points 0 0
+
+*FoomaticIDs: HP-LaserJet_4100 Postscript
+*FoomaticRIPCommandLine: "cat%A%B%Z"
+*FoomaticRIPNoPageAccounting: True
+
+*OpenGroup: General/General
+
+*OpenUI *PageSize/Page Size: PickOne
+*OrderDependency: 100 AnySetup *PageSize
+*DefaultPageSize: Letter
+*PageSize Letter/US Letter: "<</PageSize[612 792]/ImagingBBox null>>setpagedevice"
+*PageSize A4/A4: "<</PageSize[595 842]/ImagingBBox null>>setpagedevice"
+*PageSize 11x17/11x17: "<</PageSize[792 1224]/ImagingBBox null>>setpagedevice"
+*PageSize A3/A3: "<</PageSize[842 1191]/ImagingBBox null>>setpagedevice"
+*PageSize A5/A5: "<</PageSize[421 595]/ImagingBBox null>>setpagedevice"
+*PageSize B5/B5 (JIS): "<</PageSize[516 729]/ImagingBBox null>>setpagedevice"
+*PageSize Env10/Envelope #10: "<</PageSize[297 684]/ImagingBBox null>>setpagedevice"
+*PageSize EnvC5/Envelope C5: "<</PageSize[459 649]/ImagingBBox null>>setpagedevice"
+*PageSize EnvDL/Envelope DL: "<</PageSize[312 624]/ImagingBBox null>>setpagedevice"
+*PageSize EnvISOB5/Envelope B5: "<</PageSize[499 709]/ImagingBBox null>>setpagedevice"
+*PageSize EnvMonarch/Envelope Monarch: "<</PageSize[279 540]/ImagingBBox null>>setpagedevice"
+*PageSize Executive/Executive: "<</PageSize[522 756]/ImagingBBox null>>setpagedevice"
+*PageSize Legal/US Legal: "<</PageSize[612 1008]/ImagingBBox null>>setpagedevice"
+*CloseUI: *PageSize
+
+*OpenUI *PageRegion: PickOne
+*OrderDependency: 100 AnySetup *PageRegion
+*DefaultPageRegion: Letter
+*PageRegion Letter/US Letter: "<</PageSize[612 792]/ImagingBBox null>>setpagedevice"
+*PageRegion A4/A4: "<</PageSize[595 842]/ImagingBBox null>>setpagedevice"
+*PageRegion 11x17/11x17: "<</PageSize[792 1224]/ImagingBBox null>>setpagedevice"
+*PageRegion A3/A3: "<</PageSize[842 1191]/ImagingBBox null>>setpagedevice"
+*PageRegion A5/A5: "<</PageSize[421 595]/ImagingBBox null>>setpagedevice"
+*PageRegion B5/B5 (JIS): "<</PageSize[516 729]/ImagingBBox null>>setpagedevice"
+*PageRegion Env10/Envelope #10: "<</PageSize[297 684]/ImagingBBox null>>setpagedevice"
+*PageRegion EnvC5/Envelope C5: "<</PageSize[459 649]/ImagingBBox null>>setpagedevice"
+*PageRegion EnvDL/Envelope DL: "<</PageSize[312 624]/ImagingBBox null>>setpagedevice"
+*PageRegion EnvISOB5/Envelope B5: "<</PageSize[499 709]/ImagingBBox null>>setpagedevice"
+*PageRegion EnvMonarch/Envelope Monarch: "<</PageSize[279 540]/ImagingBBox null>>setpagedevice"
+*PageRegion Executive/Executive: "<</PageSize[522 756]/ImagingBBox null>>setpagedevice"
+*PageRegion Legal/US Legal: "<</PageSize[612 1008]/ImagingBBox null>>setpagedevice"
+*CloseUI: *PageRegion
+
+*DefaultImageableArea: Letter
+*ImageableArea Letter/US Letter: "18 36 594 756"
+*ImageableArea A4/A4: "18 36 577 806"
+*ImageableArea 11x17/11x17: "18 36 774 1188"
+*ImageableArea A3/A3: "18 36 824 1155"
+*ImageableArea A5/A5: "18 36 403 559"
+*ImageableArea B5/B5 (JIS): "18 36 498 693"
+*ImageableArea Env10/Envelope #10: "18 36 279 648"
+*ImageableArea EnvC5/Envelope C5: "18 36 441 613"
+*ImageableArea EnvDL/Envelope DL: "18 36 294 588"
+*ImageableArea EnvISOB5/Envelope B5: "18 36 481 673"
+*ImageableArea EnvMonarch/Envelope Monarch: "18 36 261 504"
+*ImageableArea Executive/Executive: "18 36 504 720"
+*ImageableArea Legal/US Legal: "18 36 594 972"
+
+*DefaultPaperDimension: Letter
+*PaperDimension Letter/US Letter: "612 792"
+*PaperDimension A4/A4: "595 842"
+*PaperDimension 11x17/11x17: "792 1224"
+*PaperDimension A3/A3: "842 1191"
+*PaperDimension A5/A5: "421 595"
+*PaperDimension B5/B5 (JIS): "516 729"
+*PaperDimension Env10/Envelope #10: "297 684"
+*PaperDimension EnvC5/Envelope C5: "459 649"
+*PaperDimension EnvDL/Envelope DL: "312 624"
+*PaperDimension EnvISOB5/Envelope B5: "499 709"
+*PaperDimension EnvMonarch/Envelope Monarch: "279 540"
+*PaperDimension Executive/Executive: "522 756"
+*PaperDimension Legal/US Legal: "612 1008"
+
+*JCLOpenUI *Manualfeed/Manual Feed of Paper: PickOne
+*OrderDependency: 100 JCLSetup *Manualfeed
+*DefaultManualfeed: Off
+*Manualfeed Off/Off: "@PJL SET MANUALFEED=OFF<0A>"
+*Manualfeed On/On: "@PJL SET MANUALFEED=ON<0A>"
+*JCLCloseUI: *Manualfeed
+
+*JCLOpenUI *FastRes/Fast Res.: PickOne
+*OrderDependency: 100 JCLSetup *FastRes
+*DefaultFastRes: Off
+*FastRes Off/Off: "@PJL SET BITSPERPIXEL=1<0A>"
+*FastRes On/On: "@PJL SET BITSPERPIXEL=2<0A>"
+*JCLCloseUI: *FastRes
+
+*JCLOpenUI *Economode/Economy Mode: PickOne
+*OrderDependency: 100 JCLSetup *Economode
+*DefaultEconomode: Off
+*Economode Off/Off: "@PJL SET ECONOMODE=OFF<0A>"
+*Economode On/On: "@PJL SET ECONOMODE=ON<0A>"
+*JCLCloseUI: *Economode
+
+*JCLOpenUI *Copies/Number of Copies: PickOne
+*FoomaticRIPOption Copies: int JCL A
+*FoomaticRIPOptionPrototype Copies: "SET COPIES=%s"
+*FoomaticRIPOptionRange Copies: 1 100
+*OrderDependency: 100 JCLSetup *Copies
+*DefaultCopies: 1
+*FoomaticRIPDefaultCopies: 1
+*Copies 1/1: "@PJL SET COPIES=1<0A>"
+*Copies 2/2: "@PJL SET COPIES=2<0A>"
+*Copies 3/3: "@PJL SET COPIES=3<0A>"
+*Copies 4/4: "@PJL SET COPIES=4<0A>"
+*Copies 5/5: "@PJL SET COPIES=5<0A>"
+*Copies 6/6: "@PJL SET COPIES=6<0A>"
+*Copies 7/7: "@PJL SET COPIES=7<0A>"
+*Copies 8/8: "@PJL SET COPIES=8<0A>"
+*Copies 9/9: "@PJL SET COPIES=9<0A>"
+*Copies 10/10: "@PJL SET COPIES=10<0A>"
+*Copies 11/11: "@PJL SET COPIES=11<0A>"
+*Copies 12/12: "@PJL SET COPIES=12<0A>"
+*Copies 13/13: "@PJL SET COPIES=13<0A>"
+*Copies 14/14: "@PJL SET COPIES=14<0A>"
+*Copies 15/15: "@PJL SET COPIES=15<0A>"
+*Copies 16/16: "@PJL SET COPIES=16<0A>"
+*Copies 17/17: "@PJL SET COPIES=17<0A>"
+*Copies 18/18: "@PJL SET COPIES=18<0A>"
+*Copies 19/19: "@PJL SET COPIES=19<0A>"
+*Copies 20/20: "@PJL SET COPIES=20<0A>"
+*Copies 21/21: "@PJL SET COPIES=21<0A>"
+*Copies 22/22: "@PJL SET COPIES=22<0A>"
+*Copies 23/23: "@PJL SET COPIES=23<0A>"
+*Copies 24/24: "@PJL SET COPIES=24<0A>"
+*Copies 25/25: "@PJL SET COPIES=25<0A>"
+*Copies 26/26: "@PJL SET COPIES=26<0A>"
+*Copies 27/27: "@PJL SET COPIES=27<0A>"
+*Copies 28/28: "@PJL SET COPIES=28<0A>"
+*Copies 29/29: "@PJL SET COPIES=29<0A>"
+*Copies 30/30: "@PJL SET COPIES=30<0A>"
+*Copies 31/31: "@PJL SET COPIES=31<0A>"
+*Copies 32/32: "@PJL SET COPIES=32<0A>"
+*Copies 33/33: "@PJL SET COPIES=33<0A>"
+*Copies 34/34: "@PJL SET COPIES=34<0A>"
+*Copies 35/35: "@PJL SET COPIES=35<0A>"
+*Copies 36/36: "@PJL SET COPIES=36<0A>"
+*Copies 37/37: "@PJL SET COPIES=37<0A>"
+*Copies 38/38: "@PJL SET COPIES=38<0A>"
+*Copies 39/39: "@PJL SET COPIES=39<0A>"
+*Copies 40/40: "@PJL SET COPIES=40<0A>"
+*Copies 41/41: "@PJL SET COPIES=41<0A>"
+*Copies 42/42: "@PJL SET COPIES=42<0A>"
+*Copies 43/43: "@PJL SET COPIES=43<0A>"
+*Copies 44/44: "@PJL SET COPIES=44<0A>"
+*Copies 45/45: "@PJL SET COPIES=45<0A>"
+*Copies 46/46: "@PJL SET COPIES=46<0A>"
+*Copies 47/47: "@PJL SET COPIES=47<0A>"
+*Copies 48/48: "@PJL SET COPIES=48<0A>"
+*Copies 49/49: "@PJL SET COPIES=49<0A>"
+*Copies 50/50: "@PJL SET COPIES=50<0A>"
+*Copies 51/51: "@PJL SET COPIES=51<0A>"
+*Copies 52/52: "@PJL SET COPIES=52<0A>"
+*Copies 53/53: "@PJL SET COPIES=53<0A>"
+*Copies 54/54: "@PJL SET COPIES=54<0A>"
+*Copies 55/55: "@PJL SET COPIES=55<0A>"
+*Copies 56/56: "@PJL SET COPIES=56<0A>"
+*Copies 57/57: "@PJL SET COPIES=57<0A>"
+*Copies 58/58: "@PJL SET COPIES=58<0A>"
+*Copies 59/59: "@PJL SET COPIES=59<0A>"
+*Copies 60/60: "@PJL SET COPIES=60<0A>"
+*Copies 61/61: "@PJL SET COPIES=61<0A>"
+*Copies 62/62: "@PJL SET COPIES=62<0A>"
+*Copies 63/63: "@PJL SET COPIES=63<0A>"
+*Copies 64/64: "@PJL SET COPIES=64<0A>"
+*Copies 65/65: "@PJL SET COPIES=65<0A>"
+*Copies 66/66: "@PJL SET COPIES=66<0A>"
+*Copies 67/67: "@PJL SET COPIES=67<0A>"
+*Copies 68/68: "@PJL SET COPIES=68<0A>"
+*Copies 69/69: "@PJL SET COPIES=69<0A>"
+*Copies 70/70: "@PJL SET COPIES=70<0A>"
+*Copies 71/71: "@PJL SET COPIES=71<0A>"
+*Copies 72/72: "@PJL SET COPIES=72<0A>"
+*Copies 73/73: "@PJL SET COPIES=73<0A>"
+*Copies 74/74: "@PJL SET COPIES=74<0A>"
+*Copies 75/75: "@PJL SET COPIES=75<0A>"
+*Copies 76/76: "@PJL SET COPIES=76<0A>"
+*Copies 77/77: "@PJL SET COPIES=77<0A>"
+*Copies 78/78: "@PJL SET COPIES=78<0A>"
+*Copies 79/79: "@PJL SET COPIES=79<0A>"
+*Copies 80/80: "@PJL SET COPIES=80<0A>"
+*Copies 81/81: "@PJL SET COPIES=81<0A>"
+*Copies 82/82: "@PJL SET COPIES=82<0A>"
+*Copies 83/83: "@PJL SET COPIES=83<0A>"
+*Copies 84/84: "@PJL SET COPIES=84<0A>"
+*Copies 85/85: "@PJL SET COPIES=85<0A>"
+*Copies 86/86: "@PJL SET COPIES=86<0A>"
+*Copies 87/87: "@PJL SET COPIES=87<0A>"
+*Copies 88/88: "@PJL SET COPIES=88<0A>"
+*Copies 89/89: "@PJL SET COPIES=89<0A>"
+*Copies 90/90: "@PJL SET COPIES=90<0A>"
+*Copies 91/91: "@PJL SET COPIES=91<0A>"
+*Copies 92/92: "@PJL SET COPIES=92<0A>"
+*Copies 93/93: "@PJL SET COPIES=93<0A>"
+*Copies 94/94: "@PJL SET COPIES=94<0A>"
+*Copies 95/95: "@PJL SET COPIES=95<0A>"
+*Copies 96/96: "@PJL SET COPIES=96<0A>"
+*Copies 97/97: "@PJL SET COPIES=97<0A>"
+*Copies 98/98: "@PJL SET COPIES=98<0A>"
+*Copies 99/99: "@PJL SET COPIES=99<0A>"
+*Copies 100/100: "@PJL SET COPIES=100<0A>"
+*JCLCloseUI: *Copies
+
+*CustomJCLCopies True: "@PJL SET COPIES=\1<0A>"
+*ParamCustomJCLCopies Copies/Number of Copies: 1 int 1 100
+
+
+*OpenUI *InputSlot/Media Source: PickOne
+*OrderDependency: 120 AnySetup *InputSlot
+*DefaultInputSlot: Default
+*InputSlot Default/Default: "<</ManualFeed false>>setpagedevice"
+*InputSlot Upper/Upper Tray: "<</ManualFeed false /MediaPosition 0>>setpagedevice"
+*InputSlot Lower/Lower Tray: "<</ManualFeed false /MediaPosition 1>>setpagedevice"
+*InputSlot Multipurpose/Multipurpose Tray: "<</ManualFeed false /MediaPosition 3>>setpagedevice"
+*InputSlot Manual/Manual Feeder: "<</ManualFeed true /MediaPosition 3>>setpagedevice"
+*CloseUI: *InputSlot
+
+*OpenUI *Duplex/Double-Sided Printing: PickOne
+*OrderDependency: 130 AnySetup *Duplex
+*DefaultDuplex: DuplexNoTumble
+*Duplex DuplexNoTumble/Long Edge (Standard): "<</Duplex true /Tumble false>>setpagedevice"
+*Duplex DuplexTumble/Short Edge (Flip): "<</Duplex true /Tumble true>>setpagedevice"
+*Duplex None/Off: "<</Duplex false>>setpagedevice"
+*CloseUI: *Duplex
+
+*OpenUI *Resolution/Resolution: PickOne
+*OrderDependency: 90 AnySetup *Resolution
+*DefaultResolution: 600x600dpi
+*Resolution 150x150dpi/150x150 DPI: "<</HWResolution[150 150]>>setpagedevice"
+*Resolution 300x300dpi/300x300 DPI: "<</HWResolution[300 300]>>setpagedevice"
+*Resolution 600x600dpi/600x600 DPI: "<</HWResolution[600 600]>>setpagedevice"
+*Resolution 1200x1200dpi/1200x1200 DPI: "<</HWResolution[1200 1200]>>setpagedevice"
+*CloseUI: *Resolution
+
+*CloseGroup: General
+
+*OpenGroup: Adjustment/Adjustment
+
+*JCLOpenUI *REt/Resolution Enhancement: PickOne
+*OrderDependency: 100 JCLSetup *REt
+*DefaultREt: Medium
+*REt Dark/Dark: "@PJL SET RET=DARK<0A>"
+*REt Light/Light: "@PJL SET RET=LIGHT<0A>"
+*REt Medium/Medium: "@PJL SET RET=MEDIUM<0A>"
+*REt Off/Off: "@PJL SET RET=OFF<0A>"
+*JCLCloseUI: *REt
+
+*JCLOpenUI *TonerDensity/Toner Density: PickOne
+*OrderDependency: 100 JCLSetup *TonerDensity
+*DefaultTonerDensity: 3
+*TonerDensity 1/1: "@PJL SET DENSITY=1<0A>"
+*TonerDensity 2/2: "@PJL SET DENSITY=2<0A>"
+*TonerDensity 3/3: "@PJL SET DENSITY=3<0A>"
+*TonerDensity 4/4: "@PJL SET DENSITY=4<0A>"
+*TonerDensity 5/5: "@PJL SET DENSITY=5<0A>"
+*JCLCloseUI: *TonerDensity
+
+*CloseGroup: Adjustment
+
+*OpenGroup: Miscellaneous/Miscellaneous
+
+*JCLOpenUI *MemBoost/Memory Booster Technology: PickOne
+*OrderDependency: 100 JCLSetup *MemBoost
+*DefaultMemBoost: Auto
+*MemBoost Auto/Automatic: "@PJL SET PS:MBT=AUTO<0A>"
+*MemBoost Off/Off: "@PJL SET PS:MBT=OFF<0A>"
+*MemBoost On/On: "@PJL SET PS:MBT=ON<0A>"
+*JCLCloseUI: *MemBoost
+
+*CloseGroup: Miscellaneous
+
+
+*% Generic boilerplate PPD stuff as standard PostScript fonts and so on
+
+*DefaultFont: Courier
+*Font AvantGarde-Book: Standard "(001.006S)" Standard ROM
+*Font AvantGarde-BookOblique: Standard "(001.006S)" Standard ROM
+*Font AvantGarde-Demi: Standard "(001.007S)" Standard ROM
+*Font AvantGarde-DemiOblique: Standard "(001.007S)" Standard ROM
+*Font Bookman-Demi: Standard "(001.004S)" Standard ROM
+*Font Bookman-DemiItalic: Standard "(001.004S)" Standard ROM
+*Font Bookman-Light: Standard "(001.004S)" Standard ROM
+*Font Bookman-LightItalic: Standard "(001.004S)" Standard ROM
+*Font Courier: Standard "(002.004S)" Standard ROM
+*Font Courier-Bold: Standard "(002.004S)" Standard ROM
+*Font Courier-BoldOblique: Standard "(002.004S)" Standard ROM
+*Font Courier-Oblique: Standard "(002.004S)" Standard ROM
+*Font Helvetica: Standard "(001.006S)" Standard ROM
+*Font Helvetica-Bold: Standard "(001.007S)" Standard ROM
+*Font Helvetica-BoldOblique: Standard "(001.007S)" Standard ROM
+*Font Helvetica-Narrow: Standard "(001.006S)" Standard ROM
+*Font Helvetica-Narrow-Bold: Standard "(001.007S)" Standard ROM
+*Font Helvetica-Narrow-BoldOblique: Standard "(001.007S)" Standard ROM
+*Font Helvetica-Narrow-Oblique: Standard "(001.006S)" Standard ROM
+*Font Helvetica-Oblique: Standard "(001.006S)" Standard ROM
+*Font NewCenturySchlbk-Bold: Standard "(001.009S)" Standard ROM
+*Font NewCenturySchlbk-BoldItalic: Standard "(001.007S)" Standard ROM
+*Font NewCenturySchlbk-Italic: Standard "(001.006S)" Standard ROM
+*Font NewCenturySchlbk-Roman: Standard "(001.007S)" Standard ROM
+*Font Palatino-Bold: Standard "(001.005S)" Standard ROM
+*Font Palatino-BoldItalic: Standard "(001.005S)" Standard ROM
+*Font Palatino-Italic: Standard "(001.005S)" Standard ROM
+*Font Palatino-Roman: Standard "(001.005S)" Standard ROM
+*Font Symbol: Special "(001.007S)" Special ROM
+*Font Times-Bold: Standard "(001.007S)" Standard ROM
+*Font Times-BoldItalic: Standard "(001.009S)" Standard ROM
+*Font Times-Italic: Standard "(001.007S)" Standard ROM
+*Font Times-Roman: Standard "(001.007S)" Standard ROM
+*Font ZapfChancery-MediumItalic: Standard "(001.007S)" Standard ROM
+*Font ZapfDingbats: Special "(001.004S)" Standard ROM
+

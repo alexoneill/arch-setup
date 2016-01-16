@@ -1,0 +1,10 @@
+~/.bashrc ~/.env/git/bash/.bashrc
+~/.bashrc.d ~/.env/git/bash/.bashrc.d/
+~/.bin ~/.env/git/bash/.bin/
+~/.config/termite ~/.env/git/termite/
+~/.gitconfig ~/.env/git/git/.gitconfig
+~/.i3 ~/.env/git/i3/.i3/
+~/.vim ~/.env/git/vim/.vim
+~/.vimrc ~/.env/git/vim/.vimrc
+~/.xinitrc ~/.env/git/x11/.xinitrc
+~/.Xmodmap ~/.env/git/x11/.Xmodmap

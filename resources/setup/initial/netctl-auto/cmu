@@ -1,0 +1,6 @@
+Description='Automatically generated profile by wifi-menu'
+Interface=$INTERFACE
+Connection=wireless
+Security=none
+ESSID=CMU
+IP=dhcp

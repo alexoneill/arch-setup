@@ -1,0 +1,11 @@
+#!/bin/bash
+# 20-ranger.setup
+# aoneill - 01/15/16
+
+folder=$(basename "$0" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g")
+
+tmp=$(mktemp)
+ranger=/usr/bin/ranger
+
+tail -n +2 "$ranger" | cat <(echo "#!/usr/bin/python3 -O") - > "$tmp"
+mv "$tmp" "$ranger"
