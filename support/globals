@@ -1,0 +1,18 @@
+#!/bin/bash
+
+export RESOURCES="$CWD/resources"
+export PROGS="$RESOURCES/progs"
+export PASSWD_FILE=$(mktemp)
+
+function section() {
+  in=$1
+  cols=80
+  textStart=$((($cols - ${#in}) / 2 - 1))
+
+  head=$(printf "%-${cols}s" "#")
+  echo "${head// /\#}"
+  printf "#%*s" $textStart " "
+  echo -n $in
+  printf "%*s\n" $(($cols - $textStart - ${#in} - 1)) "#"
+  echo "${head// /\#}"
+}

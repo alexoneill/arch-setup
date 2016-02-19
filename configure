@@ -2,53 +2,12 @@
 # configure
 # aoneill - 09/25/15
 
-RESOURCES="resources"
-CWD="$(pwd)"
+CWD="$PWD"
+SUPPORT="$CWD/support"
+source "$SUPPORT/globals"
 
-# Temporary method to pull packages from AUR (to install yaourt)
-function AURShim() {
-  pkg="$1"
-  filename="${pkg}.tar.gz"
-  
-  echo "Installing $pkg from AUR..."
-  exit
-
-  # Get package
-  tmp="$(mktemp -d)"
-  cd "$tmp"
-  wget "https://aur.archlinux.org/cgit/aur.git/snapshot/$filename" &>/dev/null
-  tar xf "$filename"
-  cd "$pkg"
-
-  # Make contents and install
-  makepkg --noconfirm -sri &>/dev/null
-
-  cd "$CWD"
-}
-
-# Install all the packages needed
-function packages() {
-  for manager in pacman yaourt
-  do
-    file="$CWD/$RESOURCES/packages.$manager"
-    echo $manager --noconfirm -S $(cat "$file")
-  done
-}
-
-function post-install() {
-  SETUP="setup"
-  cd "$CWD/$RESOURCES/$SETUP"
-
-  tmp=$(mktemp)
-  find * -maxdepth 0 -type d > $tmp
-
-  exec 3>&1
-  out=$(eval "dialog --title \"Install Step\" --menu \"Step:\" 10 30 3 $(cat -n $tmp)" 2>&1 1>&3)
-  exec 3>&-
-
-  step=$(sed -e "${out}q;d" $tmp)
-  cd $step
-
+function pre-setup() {
+  cd $SUPPORT
   for file in $(ls)
   do
     if [[ -x "$file" ]]
@@ -56,30 +15,40 @@ function post-install() {
       "$file"
     fi
   done
+  cd $CWD
 }
 
-# Need root-level permissions (assuming no sudo)
-if [[ "$(whoami)" != "root" ]]
-then
-  echo "Need root-level access. Run as root!"
-  exit
-fi
+function prog-setup() {
+  cd $PROGS
+  for file in $(ls)
+  do
+    if [[ -x "$file" ]]
+    then
+      "$file"
+    fi
+  done
+  cd $CWD
+}
 
-echo "Installer of Alex O'Neill's Arch Environmrnt"
-echo -n "Desired username: "
-read user
-export MAIN_USER=$user
+function init() {
+  # Need root-level permissions (assuming no sudo)
+  if [[ "$(whoami)" != "root" ]]
+  then
+    echo "Need root-level access. Run as root!"
+    exit
+  fi
 
-# Setup pacman for 32-bit libs
-echo "
-[multilib]
-Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+  section "Alex O'Neill's Arch Customizer"  
 
-# Install needed packages for future use
-AURShim package-query
-AURShim yaourt
+  echo -e "\
+This is intended to configure a vanilla installation of Arch Linux to be
+as close to the working copy I run on my various computers. See the README
+for more information!\n"
 
-# Install packages (from both standard repositories and AUR)
-packages
+  pre-setup
+  prog-setup
 
-post-install
+  reboot
+}
+
+init $@

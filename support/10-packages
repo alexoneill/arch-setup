@@ -1,0 +1,53 @@
+#!/bin/bash
+# 10-packages
+# aoneill - 02/19/16
+
+EXEC=$(test "$_" != "$0"; echo $?)
+source $PWD/globals
+
+# Temporary method to pull packages from AUR (to install yaourt)
+function aurShim() {
+  pkg="$1"
+  filename="${pkg}.tar.gz"
+  
+  echo "Installing $pkg from AUR..."
+  exit
+
+  # Get package
+  tmp="$(mktemp -d)"
+  cd "$tmp"
+  wget "https://aur.archlinux.org/cgit/aur.git/snapshot/$filename" &>/dev/null
+  tar xf "$filename"
+  cd "$pkg"
+
+  # Make contents and install
+  makepkg --noconfirm -sri &>/dev/null
+
+  cd "$CWD"
+  rm -rf $tmp
+}
+
+# Install all the packages needed
+function init() {
+  section Packages
+
+  # Setup pacman for 32-bit libs 
+  echo "
+  [multilib]
+  Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+
+  # Install needed packages for future use
+  aurShim package-query
+  aurShim yaourt
+
+  # Install packages (from both standard repositories and AUR)
+  for manager in pacman yaourt
+  do
+    echo "Installing packages for $manager..."
+    file="$PWD/$RESOURCES/packages.$manager"
+    echo $manager --noconfirm -S $(cat "$file")
+  done
+}
+
+# Execute init (passing arguments) if we are not sourced
+[[ "$EXEC" == "1" ]] && init

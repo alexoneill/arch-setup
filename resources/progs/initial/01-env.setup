@@ -14,5 +14,5 @@ cat "$folder/links" | while IFS= read -r line; do
   link=$(echo $line | awk '{ print $1; }')
   src=$(echo $line | awk '{ print $2; }')
 
-  eval "ln -s $src $link"
+  echo "ln -s $src $link"
 done
