@@ -2,13 +2,13 @@
 # configure
 # aoneill - 09/25/15
 
-CWD="$PWD"
-SUPPORT="$CWD/support"
+export CWD="$PWD"
+export SUPPORT="$CWD/support"
 source "$SUPPORT/globals"
 
 function pre-setup() {
   cd $SUPPORT
-  for file in $(ls)
+  for file in $(find . -maxdepth 1 -type f | sort)
   do
     if [[ -x "$file" ]]
     then
@@ -20,7 +20,7 @@ function pre-setup() {
 
 function prog-setup() {
   cd $PROGS
-  for file in $(ls)
+  for file in $(find . -maxdepth 1 -type f | sort)
   do
     if [[ -x "$file" ]]
     then
@@ -48,7 +48,7 @@ for more information!\n"
   pre-setup
   prog-setup
 
-  reboot
+  echo reboot
 }
 
 init $@

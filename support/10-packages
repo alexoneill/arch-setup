@@ -3,7 +3,7 @@
 # aoneill - 02/19/16
 
 EXEC=$(test "$_" != "$0"; echo $?)
-source $PWD/globals
+source globals
 
 # Temporary method to pull packages from AUR (to install yaourt)
 function aurShim() {
@@ -11,7 +11,6 @@ function aurShim() {
   filename="${pkg}.tar.gz"
   
   echo "Installing $pkg from AUR..."
-  exit
 
   # Get package
   tmp="$(mktemp -d)"
@@ -21,7 +20,7 @@ function aurShim() {
   cd "$pkg"
 
   # Make contents and install
-  makepkg --noconfirm -sri &>/dev/null
+  echo "makepkg --noconfirm -sri &>/dev/null"
 
   cd "$CWD"
   rm -rf $tmp
@@ -32,19 +31,21 @@ function init() {
   section Packages
 
   # Setup pacman for 32-bit libs 
-  echo "
-  [multilib]
-  Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+  #echo "
+  #[multilib]
+  #Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
 
   # Install needed packages for future use
   aurShim package-query
   aurShim yaourt
 
+  pwd
+
   # Install packages (from both standard repositories and AUR)
   for manager in pacman yaourt
   do
     echo "Installing packages for $manager..."
-    file="$PWD/$RESOURCES/packages.$manager"
+    file="$RESOURCES/packages.$manager"
     echo $manager --noconfirm -S $(cat "$file")
   done
 }
