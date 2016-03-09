@@ -35,6 +35,16 @@ function prog-setup() {
   cd $CWD
 }
 
+function blurb() {
+  section "Alex O'Neill's Arch Customizer"  
+
+  echo -e "\
+This is intended to configure a vanilla installation of Arch Linux to be
+as close to the working copy I run on my various computers. See the README
+for more information!\n"
+}
+
+
 function init() {
   # Need root-level permissions (assuming no sudo)
   if [[ "$(whoami)" != "root" ]]
@@ -43,20 +53,29 @@ function init() {
     exit
   fi
   
-  global-setup
-  source "$SUPPORT/globals"
+  if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
+  then
+    global-setup
+    source "$SUPPORT/globals"
 
-  section "Alex O'Neill's Arch Customizer"  
+    blurb
+    echo "Currently configuring while booted from live media. Will skip"
+    echo "program-specific installation. Run '$0' once booted into bare arch"
+    echo "installation with root user to configure programs and"
+    echo "environment fully."
 
-  echo -e "\
-This is intended to configure a vanilla installation of Arch Linux to be
-as close to the working copy I run on my various computers. See the README
-for more information!\n"
+    pre-setup
+  else
+    source "$SUPPORT/globals"
+    
+    blurb
+    echo "Currently configuring while truly booted into Arch. Skipping"
+    echo "initial configuration, working on package-specific configuration."
+    
+    prog-setup
+  fi
 
-  pre-setup
-  prog-setup
-
-  echo reboot
+  echo "'reboot' to apply all changes"
 }
 
 init $@

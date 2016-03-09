@@ -1,5 +1,5 @@
 #!/bin/bash
-# 10-accounts
+# 20-accounts
 # aoneill - 03/09/16
 
 SUPPORT="$CWD/support"
