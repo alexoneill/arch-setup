@@ -1,7 +1,7 @@
 export RESOURCES="/root/arch-setup/resources"
-export PASSWD_FILE=/tmp/tmp.Uv2WxVcouw
-export HOMEDIR_FILE=/tmp/tmp.5P20qDppYD
-export WIFI_IFACE_FILE=/tmp/tmp.AeMnwuTmHA
+export PASSWD_FILE=/tmp/tmp.hgrg0fOc0T
+export HOMEDIR_FILE=/tmp/tmp.z4LQIkxnLf
+export WIFI_IFACE_FILE=/tmp/tmp.gQfhXTrsJ0
 export PROGS="$RESOURCES/progs"
 export GLOBAL_LOCK="$RESOURCES/.global_lock"
 
@@ -20,4 +20,9 @@ function section() {
 
 function get_folder() {
   basename "$1" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g"
+}
+
+function expand_glob() {
+  list=($1)
+  echo "${list[@]}"
 }

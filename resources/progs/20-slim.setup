@@ -2,15 +2,14 @@
 # 20-slim.setup
 # aoneill - 01/15/16
 
-EXEC=$(test "$_" != "$0"; echo $?)
-SUPPORT="$1"
-GLOBALS="$2"
+SUPPORT="$CWD/support"
+GLOBALS="$SUPPORT/globals"
 
 source "$GLOBALS"
 
 # Use utilities here
-source "$SUPPORT/*-passwords"
-source "$SUPPORT/*-accounts"
+source $(expand_glob "$SUPPORT/*-passwords")
+source $(expand_glob "$SUPPORT/*-accounts")
 
 function init() {
   section SLiM
@@ -21,4 +20,5 @@ function init() {
   systemctl enable slim.service
 } 
 
-[[ "$EXEC" == "1" ]] && init
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

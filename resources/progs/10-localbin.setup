@@ -2,9 +2,8 @@
 # 10-localbin.setup
 # aoneill - 01/15/16
 
-EXEC=$(test "$_" != "$0"; echo $?)
-SUPPORT="$1"
-GLOBALS="$2"
+SUPPORT="$CWD/support"
+GLOBALS="$SUPPORT/globals"
 
 source "$GLOBALS"
 
@@ -13,9 +12,12 @@ function init() {
 
   folder=$(get_folder "$0")
   localbin=/usr/local/bin/
+  ls $folder
 
-  echo "cp -r \"$folder/*\" \"$localbin\""
-  cp -r "$folder/*" "$localbin"
+  echo "cp -r \"$(pwd)/$folder/*\" \"$localbin\""
+  cp -r "$(pwd)/$folder/*" "$localbin"
+  ls "$(pwd)/$folder/*" "$localbin"
 }
 
-[[ "$EXEC" == "1" ]] && init
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

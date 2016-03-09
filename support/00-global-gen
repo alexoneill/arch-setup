@@ -9,7 +9,7 @@ function init() {
     cwd=$CWD
   fi
 
-  cat << EOF > "$cwd/globals"
+  cat << EOF > "$cwd/support/globals"
 export RESOURCES="$cwd/resources"
 export PASSWD_FILE=$(mktemp)
 export HOMEDIR_FILE=$(mktemp)
@@ -32,6 +32,11 @@ function section() {
 
 function get_folder() {
   basename "\$1" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g"
+}
+
+function expand_glob() {
+  list=(\$1)
+  echo "\${list[@]}"
 }
 EOF
 }

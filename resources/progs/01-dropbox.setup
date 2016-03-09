@@ -1,16 +1,15 @@
 #!/bin/bash
 # 10-dropbox.setup
 # aoneill - 01/15/16
-      
-EXEC=$(test "$_" != "$0"; echo $?)
-SUPPORT="$1"
-GLOBALS="$2"
+
+SUPPORT="$CWD/support"
+GLOBALS="$SUPPORT/globals"
 
 source "$GLOBALS"
 
 # Use utilities here
-source "$SUPPORT/*-passwords"
-source "$SUPPORT/*-accounts"
+source $(expand_glob "$SUPPORT/*-passwords")
+source $(expand_glob "$SUPPORT/*-accounts")
 
 function init() {
   section "Dropbox (filesystem stubs)"
@@ -20,10 +19,10 @@ function init() {
   systemctl enable dropbox@$MAIN_USER.service
   systemctl start dropbox@$MAIN_USER.service
 
-  mkdir $(acc_get_home)/.data
+  mkdir -p $(acc_get_home)/.data
 
   cat "$folder/links" | while IFS= read -r line; do
-    line=$(echo $line | sed -e "s/~/$(acc_get_home)/g")
+    line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
     link=$(echo $line | awk '{ print $1; }')
     src=$(echo $line | awk '{ print $2; }')
 
@@ -32,4 +31,5 @@ function init() {
   done
 } 
 
-[[ "$EXEC" == "1" ]] && init
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

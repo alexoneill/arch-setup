@@ -2,8 +2,8 @@
 # 20-packages
 # aoneill - 02/19/16
 
-SUPPORT="."
-GLOBALS="globals"
+SUPPORT="$CWD/support"
+GLOBALS="$SUPPORT/globals"
 
 source "$GLOBALS"
 
