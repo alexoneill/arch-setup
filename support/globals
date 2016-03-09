@@ -4,6 +4,7 @@ export RESOURCES="$CWD/resources"
 export PROGS="$RESOURCES/progs"
 
 export PASSWD_FILE=$(mktemp)
+export HOMEDIR_FILE=$(mktemp)
 
 function section() {
   in=$1

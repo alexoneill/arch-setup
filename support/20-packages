@@ -1,5 +1,5 @@
 #!/bin/bash
-# 10-packages
+# 20-packages
 # aoneill - 02/19/16
 
 EXEC=$(test "$_" != "$0"; echo $?)
@@ -31,9 +31,9 @@ function init() {
   section Packages
 
   # Setup pacman for 32-bit libs 
-  #echo "
-  #[multilib]
-  #Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+  echo "
+  [multilib]
+  Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
 
   # Install needed packages for future use
   aurShim package-query
@@ -46,7 +46,7 @@ function init() {
   do
     echo "Installing packages for $manager..."
     file="$RESOURCES/packages.$manager"
-    echo $manager --noconfirm -S $(cat "$file")
+    $manager --noconfirm -S $(cat "$file")
   done
 }
 

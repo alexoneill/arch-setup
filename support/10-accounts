@@ -1,0 +1,54 @@
+#!/bin/bash
+# 10-accounts
+# aoneill - 03/09/16
+
+EXEC=$(test "$_" != "$0"; echo $?)
+source $PWD/globals
+
+# Use utilities here
+source $(pwd)/00-passwords
+
+function init() {
+  section Accounts
+
+  echo "Configuring user account"
+  tmp=$(mktemp)
+  pw_lookup archlinux > $tmp
+  user=$(cat $tmp | head -n 1)
+  password=$(cat $tmp | tail -n 1)
+
+  # Initialize the HOME_DIR variable
+  homedir=/home/$user 
+  echo "$homedir" > $HOMEDIR_FILE
+
+  useradd -h $homedir -m -G sudo $user
+  echo "$user:$password" | chpasswd
+
+  echo "Configuring Github account"
+  pw_lookup github > $tmp
+  user=$(cat $tmp | head -n 1)
+  password=$(cat $tmp | tail -n 1)
+
+  # Generate RSA Key
+  mkdir -p $homedir/.ssh
+  ssh-keygen -t rsa -f $homedir/.ssh/id_rsa -N ''
+
+  while [[ $(curl -u "$user:$password" "https://api.github.com" \
+          | grep "Bad credentials") == "" ]]
+  do
+    pw_screwup github
+    pw_lookup github > $tmp
+    user=$(cat $tmp | head -n 1)
+    password=$(cat $tmp | tail -n 1)
+  done
+  curl -u "$user:$password" \
+    --data "{\"title\": \"$(hostname)\", \
+             \"key\": \"$(cat $homedir/.ssh/id_rsa.pub)\"}" \
+    "https://api.github.com/user/keys"
+} 
+
+function acc_get_home() {
+  cat $HOMEDIR_FILE
+}
+
+[[ "$EXEC" == "1" ]] && init
