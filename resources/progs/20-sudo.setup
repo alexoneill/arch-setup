@@ -1,0 +1,24 @@
+#!/bin/bash
+# 20-sudo.setup
+# aoneill - 03/09/16
+
+SUPPORT="$CWD/support"
+GLOBALS="$SUPPORT/globals"
+
+source "$GLOBALS"
+
+# Use utilities here
+source $(expand_glob "$SUPPORT/*-passwords")
+source $(expand_glob "$SUPPORT/*-accounts")
+
+function init() {
+  section sudo
+  
+  folder="$(get_folder "$0")"
+
+  echo "cp \"$folder/groups.conf\" \"/etc/sudoers.d/\""
+  cp "$folder/groups.conf" "/etc/sudoers.d/"
+} 
+
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

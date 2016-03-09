@@ -15,7 +15,6 @@ export PASSWD_FILE=$(mktemp)
 export HOMEDIR_FILE=$(mktemp)
 export WIFI_IFACE_FILE=$(mktemp)
 export PROGS="\$RESOURCES/progs"
-export GLOBAL_LOCK="\$RESOURCES/.global_lock"
 
 function section() {
   in=\$1
