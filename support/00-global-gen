@@ -11,9 +11,9 @@ function init() {
 
   cat << EOF > "$cwd/support/globals"
 export RESOURCES="$cwd/resources"
-export PASSWD_FILE=$(mktemp)
-export HOMEDIR_FILE=$(mktemp)
-export WIFI_IFACE_FILE=$(mktemp)
+export PASSWD_FILE=$(mktemp -p "$cwd/support/tmp")
+export HOMEDIR_FILE=$(mktemp -p "$cwd/support/tmp")
+export WIFI_IFACE_FILE=$(mktemp -p "$cwd/support/tmp")
 export PROGS="\$RESOURCES/progs"
 
 function section() {
