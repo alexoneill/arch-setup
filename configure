@@ -5,9 +5,13 @@
 export CWD="$PWD"
 export SUPPORT="$CWD/support"
 
+function global-setup() {
+  "$SUPPORT/00-global-gen"
+}
+
 function pre-setup() {
   cd $SUPPORT
-  for file in $(find . -maxdepth 1 -type f | sort)
+  for file in $(find . -maxdepth 1 -type f -name "*-*" -not -name "0*" | sort)
   do
     if [[ -x "$file" ]]
     then
@@ -38,6 +42,9 @@ function init() {
     echo "Need root-level access. Run as root!"
     exit
   fi
+  
+  global-setup
+  source "$SUPPORT/globals"
 
   section "Alex O'Neill's Arch Customizer"  
 

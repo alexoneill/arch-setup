@@ -16,7 +16,8 @@ function init() {
   
   folder="$(get_folder "$0")"
 
-  cp "$folder/slim.conf" "/etc/slim/conf"
+  echo "cp \"$folder/slim.conf\" \"/etc/slim.conf\""
+  cp "$folder/slim.conf" "/etc/slim.conf"
   systemctl enable slim.service
 } 
 

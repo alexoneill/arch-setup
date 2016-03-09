@@ -12,11 +12,9 @@ function init() {
 
   folder=$(get_folder "$0")
   localbin=/usr/local/bin/
-  ls $folder
 
-  echo "cp -r \"$(pwd)/$folder/*\" \"$localbin\""
-  cp -r "$(pwd)/$folder/*" "$localbin"
-  ls "$(pwd)/$folder/*" "$localbin"
+  echo "cp -r $(pwd)/$folder/* $localbin"
+  cp -r $(pwd)/$folder/* $localbin
 }
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

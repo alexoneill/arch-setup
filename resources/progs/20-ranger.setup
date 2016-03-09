@@ -19,7 +19,9 @@ function init() {
   tmp=$(mktemp)
   ranger=/usr/bin/ranger
 
-  tail -n +2 "$ranger" | cat <(echo "#!/usr/bin/python3 -O") - > "$tmp"
+  echo "tail -n +2 $ranger | cat <(echo \"#!/usr/bin/python3 -O\") - \
+> \"$ranger\""
+  tail -n +2 $ranger | cat <(echo "#!/usr/bin/python3 -O") - > "$tmp"
   mv "$tmp" "$ranger"
 } 
 

@@ -22,7 +22,7 @@ function init() {
 
   echo "Known interfaces: $(echo "$(cat $ifaces)")"
   echo "Assuming '$device' for wireless functionality"
-  echo -n "Give alternate device (nothing means '$device' is okay)"
+  echo -n "Give alternate device (nothing means '$device' is okay): "
   read alt_dev
   while [[ "$alt_dev" != "" && "$(grep "^$alt_dev\$" $ifaces)" == "" ]]
   do
@@ -39,26 +39,44 @@ function init() {
   echo "$device" > $WIFI_IFACE_FILE
   rm $ifaces
 
+  echo "Using '$device' for wireless functionality"
   systemctl enable netctl-auto@$WIRELESS_IFACE.service
 
-  for file in $(find "$folder/" -type f -not -name "cmu-secure")
+  # Ignore profiles we already have credentials for
+  for file in $(find "$folder/" -type f -not -name "cmu-secure"\
+                                        -not -name "eduroam")
   do
-    echo "Configuring $file"
-    echo -n "Network password: "
-    read pass
+    tmp=$(mktemp)
+    cat "$file" | sed -e "s/\$INTERFACE/$device/g" | tee $tmp >/dev/null
+     
+    if [[ "$(grep "\$PASSWORD" $tmp)" != "" ]]
+    then
+      echo "Configuring $file"
+      echo -n "Network password: "
+      read pass
+      
+      otherTmp=$(mktemp)
+      cat $tmp | sed -e "s/\$PASSWORD/$pass/g" | tee $otherTmp >/dev/null
+      cp $otherTmp $tmp
+    fi
 
-    cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g" \
-      | sed -e "s/\$PASSWORD/$pass/g" > "/etc/netctl/$file"
+    cp $tmp "/etc/netctl/$(basename $file)"
   done
     
-  # Handle CMU Secure case (given password earlier)
+  # Handle CMU Secure + Eduroam case (given password earlier)
   tmp=$(mktemp)
-  pw_lookup andrew > $tmp
+  pw_lookup andrew | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
 
   echo "Configuring cmu-secure"
   file=cmu-secure
+  cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g" \
+    | sed -e "s/\$USER/$user/g" \
+    | sed -e "s/\$PASSWORD/$password/g" > "/etc/netctl/$file"
+
+  echo "Configuring eduroam"
+  file=eduroam
   cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g" \
     | sed -e "s/\$USER/$user/g" \
     | sed -e "s/\$PASSWORD/$password/g" > "/etc/netctl/$file"

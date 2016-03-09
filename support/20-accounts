@@ -36,6 +36,10 @@ function init() {
   mkdir -p $homedir/.ssh
   ssh-keygen -t rsa -f $homedir/.ssh/id_rsa -N ''
 
+  # Temporarily clone the ssh key for root use
+  mkdir -p ~/.ssh
+  cp -r $homedir/.ssh/id_rsa* ~/.ssh/
+
   curl -u "$user:$password" "https://api.github.com" | grep "Bad credentials"
   while [[ "$?" == "0" ]]
   do
@@ -46,7 +50,7 @@ function init() {
     curl -u "$user:$password" "https://api.github.com" | grep "Bad credentials"
   done
   curl -u "$user:$password" \
-    --data "{\"title\": \"$(hostname)\", \
+    --data "{\"title\": \"$(cat /etc/hostname)\", \
              \"key\": \"$(cat $homedir/.ssh/id_rsa.pub)\"}" \
     "https://api.github.com/user/keys"
 } 

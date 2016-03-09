@@ -1,7 +1,7 @@
 export RESOURCES="/root/arch-setup/resources"
-export PASSWD_FILE=/tmp/tmp.hgrg0fOc0T
-export HOMEDIR_FILE=/tmp/tmp.z4LQIkxnLf
-export WIFI_IFACE_FILE=/tmp/tmp.gQfhXTrsJ0
+export PASSWD_FILE=/tmp/tmp.TqiC24hHGN
+export HOMEDIR_FILE=/tmp/tmp.PcIWvZzX8R
+export WIFI_IFACE_FILE=/tmp/tmp.rsauBM8oXY
 export PROGS="$RESOURCES/progs"
 export GLOBAL_LOCK="$RESOURCES/.global_lock"
 
