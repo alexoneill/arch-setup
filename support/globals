@@ -5,6 +5,7 @@ export PROGS="$RESOURCES/progs"
 
 export PASSWD_FILE=$(mktemp)
 export HOMEDIR_FILE=$(mktemp)
+export WIFI_IFACE_FILE=$(mktemp)
 
 function section() {
   in=$1
@@ -17,4 +18,8 @@ function section() {
   echo -n $in
   printf "%*s\n" $(($cols - $textStart - ${#in} - 1)) "#"
   echo "${head// /\#}"
+}
+
+function get_folder() {
+  basename "$1" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g"
 }

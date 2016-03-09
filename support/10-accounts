@@ -3,10 +3,13 @@
 # aoneill - 03/09/16
 
 EXEC=$(test "$_" != "$0"; echo $?)
-source $PWD/globals
+SUPPORT="$1"
+GLOBALS="$2"
+
+source "$GLOBALS"
 
 # Use utilities here
-source $(pwd)/00-passwords
+source $SUPPORT/*-passwords
 
 function init() {
   section Accounts

@@ -3,7 +3,10 @@
 # aoneill - 02/19/16
 
 EXEC=$(test "$_" != "$0"; echo $?)
-source globals
+SUPPORT="$1"
+GLOBALS="$2"
+
+source "$GLOBALS"
 
 # Temporary method to pull packages from AUR (to install yaourt)
 function aurShim() {

@@ -1,0 +1,21 @@
+#!/bin/bash
+# 10-localbin.setup
+# aoneill - 01/15/16
+
+EXEC=$(test "$_" != "$0"; echo $?)
+SUPPORT="$1"
+GLOBALS="$2"
+
+source "$GLOBALS"
+
+function init() {
+  section Localbin
+
+  folder=$(get_folder "$0")
+  localbin=/usr/local/bin/
+
+  echo "cp -r \"$folder/*\" \"$localbin\""
+  cp -r "$folder/*" "$localbin"
+}
+
+[[ "$EXEC" == "1" ]] && init

@@ -1,0 +1,26 @@
+#!/bin/bash
+# 20-env.setup
+# aoneill - 01/15/16
+
+EXEC=$(test "$_" != "$0"; echo $?)
+SUPPORT="$1"
+GLOBALS="$2"
+
+source "$GLOBALS"
+
+# Use utilities here
+source "$SUPPORT/*-passwords"
+source "$SUPPORT/*-accounts"
+
+function init() {
+  section termite
+  
+  folder="$(get_folder "$0")"
+
+  mkdir -p $(acc_get_home)/.config/termite
+  cd $(acc_get_home)/.config/termite
+  echo "ln -s \"config-inconsolata\" \"config\""
+  ln -s "config-inconsolata" "config"
+} 
+
+[[ "$EXEC" == "1" ]] && init

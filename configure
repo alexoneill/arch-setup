@@ -24,7 +24,7 @@ function prog-setup() {
   do
     if [[ -x "$file" ]]
     then
-      "$file"
+      "$file" "$SUPPORT" "$SUPPORT/globals"
     fi
   done
   cd $CWD

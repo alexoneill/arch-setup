@@ -1,0 +1,27 @@
+#!/bin/bash
+# 20-ranger.setup
+# aoneill - 01/15/16
+
+EXEC=$(test "$_" != "$0"; echo $?)
+SUPPORT="$1"
+GLOBALS="$2"
+
+source "$GLOBALS"
+
+# Use utilities here
+source "$SUPPORT/*-passwords"
+source "$SUPPORT/*-accounts"
+
+function init() {
+  section ranger
+  
+  folder="$(get_folder "$0")"
+
+  tmp=$(mktemp)
+  ranger=/usr/bin/ranger
+
+  tail -n +2 "$ranger" | cat <(echo "#!/usr/bin/python3 -O") - > "$tmp"
+  mv "$tmp" "$ranger"
+} 
+
+[[ "$EXEC" == "1" ]] && init

@@ -1,8 +1,0 @@
-#!/bin/bash
-# slim.setup
-# aoneill - 01/15/16
-
-folder=$(basename "$0" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g")
-
-cp "$folder/slim.conf" "/etc/slim/conf"
-systemctl enable slim.service

@@ -11,6 +11,6 @@ WPAConfigSection=(
 	'proto=RSN WPA'
 	'key_mgmt=WPA-EAP'
 	'eap=PEAP'
-	'identity="aoneill"'
+	'identity="$USER"'
 	'password="$PASSWORD"'
 )
