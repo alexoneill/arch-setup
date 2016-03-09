@@ -1,0 +1,17 @@
+--- /usr/bin/makepkg	2016-02-26 05:07:15.000000000 +0000
++++ makepkg	2016-03-09 06:19:32.670700461 +0000
+@@ -2112,13 +2112,7 @@
+ PACKAGER=${_PACKAGER:-$PACKAGER}
+ CARCH=${_CARCH:-$CARCH}
+ 
+-if (( ! INFAKEROOT )); then
+-	if (( EUID == 0 )); then
+-		error "$(gettext "Running %s as root is not allowed as it can cause permanent,\n\
+-catastrophic damage to your system.")" "makepkg"
+-		exit 1 # $E_USER_ABORT
+-	fi
+-else
++if (( INFAKEROOT )); then
+ 	if [[ -z $FAKEROOTKEY ]]; then
+ 		error "$(gettext "Do not use the %s option. This option is only for use by %s.")" "'-F'" "makepkg"
+ 		exit 1 # TODO: error code

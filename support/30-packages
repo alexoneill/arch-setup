@@ -1,0 +1,75 @@
+#!/bin/bash
+# 20-packages
+# aoneill - 02/19/16
+
+SUPPORT="."
+GLOBALS="globals"
+
+source "$GLOBALS"
+
+# Use utilities here
+source $SUPPORT/*-passwords
+
+# Patch makepkg to run as root (will be reverted later)
+function makepkg-patch() {
+  patch /usr/bin/makepkg < "$RESOURCES/makepkg-patch.diff"
+} 
+
+# Temporary method to pull packages from AUR (to install yaourt)
+function aurShim() {
+  pkg="$1"
+  user="$2"
+  cwd=$(pwd)
+  
+  filename="${pkg}.tar.gz"
+  echo "Installing $pkg from AUR..."
+
+  # Get package
+  tmp="$(mktemp -d)"
+  cd "$tmp"
+  wget "https://aur.archlinux.org/cgit/aur.git/snapshot/$filename"
+  tar xf "$filename"
+  cd "$pkg"
+
+  # Make contents and install
+  chmod -R 777 $tmp
+  makepkg --noconfirm -sri
+
+  cd "$cwd"
+  rm -rf $tmp
+}
+
+# Install all the packages needed
+function init() {
+  section Packages
+
+  # Setup pacman for 32-bit libs 
+  echo "
+[multilib]
+Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+  pacman -Sy
+
+  # Get user
+  tmp=$(mktemp)
+  pw_lookup archlinux | tee $tmp >/dev/null
+  user=$(cat $tmp | head -n 1)
+
+  # Install needed packages for future use
+  makepkg-patch
+  aurShim package-query $user
+  aurShim yaourt $user
+  
+  # Installing community packages
+  echo "Installing packages for yaourt..."
+  file="$RESOURCES/packages.yaourt"
+  yaourt --noconfirm -S $(cat "$file")
+
+  # Install standard packages
+  echo "Installing packages for pacman..."
+  file="$RESOURCES/packages.pacman"
+  pacman --noconfirm -S $(cat "$file")
+}
+
+# Execute init (passing arguments) if we are not sourced
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

@@ -1,6 +1,4 @@
 alsa-utils
-base
-base-devel
 bash-completion
 coreutils
 cronie
@@ -9,13 +7,12 @@ dmenu
 dosfstools
 evince
 foomatic-db
-foomatic-db0-engine
-foomatic-db-notfree
-gcc-multilib
+foomatic-db-nonfree
+foomatic-db-engine
+gcc-libs
 gdb
 git
 gparted
-gummiboot
 hfsprogs
 hunspell-en
 i3
@@ -26,6 +23,7 @@ meld
 nitrogen
 npm
 openssh
+pacman
 pulseaudio
 pulseaudio-alsa
 ranger
@@ -37,8 +35,8 @@ slim
 slim-themes
 steam
 termite
-tor
 texlive-most
+tor
 ttf-dejavu
 ttf-inconsolata
 unrar

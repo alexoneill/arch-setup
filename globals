@@ -1,0 +1,23 @@
+export RESOURCES="/root/arch-setup/resources"
+export PASSWD_FILE=/tmp/tmp.Uv2WxVcouw
+export HOMEDIR_FILE=/tmp/tmp.5P20qDppYD
+export WIFI_IFACE_FILE=/tmp/tmp.AeMnwuTmHA
+export PROGS="$RESOURCES/progs"
+export GLOBAL_LOCK="$RESOURCES/.global_lock"
+
+function section() {
+  in=$1
+  cols=80
+  textStart=$((($cols - ${#in}) / 2 - 1))
+
+  head=$(printf "%-${cols}s" "#")
+  echo "${head// /\#}"
+  printf "#%*s" $textStart " "
+  echo -n $in
+  printf "%*s\n" $(($cols - $textStart - ${#in} - 1)) "#"
+  echo "${head// /\#}"
+}
+
+function get_folder() {
+  basename "$1" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g"
+}

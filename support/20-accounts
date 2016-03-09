@@ -2,9 +2,8 @@
 # 10-accounts
 # aoneill - 03/09/16
 
-EXEC=$(test "$_" != "$0"; echo $?)
-SUPPORT="$1"
-GLOBALS="$2"
+SUPPORT="."
+GLOBALS="globals"
 
 source "$GLOBALS"
 
@@ -16,7 +15,7 @@ function init() {
 
   echo "Configuring user account"
   tmp=$(mktemp)
-  pw_lookup archlinux > $tmp
+  pw_lookup archlinux | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
 
@@ -24,11 +23,12 @@ function init() {
   homedir=/home/$user 
   echo "$homedir" > $HOMEDIR_FILE
 
-  useradd -h $homedir -m -G sudo $user
+  groupadd -f sudo
+  useradd -d $homedir -m -G sudo $user
   echo "$user:$password" | chpasswd
-
+  
   echo "Configuring Github account"
-  pw_lookup github > $tmp
+  pw_lookup github | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
 
@@ -36,13 +36,14 @@ function init() {
   mkdir -p $homedir/.ssh
   ssh-keygen -t rsa -f $homedir/.ssh/id_rsa -N ''
 
-  while [[ $(curl -u "$user:$password" "https://api.github.com" \
-          | grep "Bad credentials") == "" ]]
+  curl -u "$user:$password" "https://api.github.com" | grep "Bad credentials"
+  while [[ "$?" == "0" ]]
   do
     pw_screwup github
-    pw_lookup github > $tmp
+    pw_lookup github | tee $tmp >/dev/null
     user=$(cat $tmp | head -n 1)
     password=$(cat $tmp | tail -n 1)
+    curl -u "$user:$password" "https://api.github.com" | grep "Bad credentials"
   done
   curl -u "$user:$password" \
     --data "{\"title\": \"$(hostname)\", \
@@ -54,4 +55,6 @@ function acc_get_home() {
   cat $HOMEDIR_FILE
 }
 
-[[ "$EXEC" == "1" ]] && init
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@
+

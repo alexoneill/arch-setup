@@ -1,0 +1,40 @@
+#!/bin/bash
+# 00-global-gen
+# aoneill - 03/09/16
+
+function init() {
+  cwd="$1"
+  if [[ "$cwd" == "" ]]
+  then
+    cwd=$CWD
+  fi
+
+  cat << EOF > "$cwd/globals"
+export RESOURCES="$cwd/resources"
+export PASSWD_FILE=$(mktemp)
+export HOMEDIR_FILE=$(mktemp)
+export WIFI_IFACE_FILE=$(mktemp)
+export PROGS="\$RESOURCES/progs"
+export GLOBAL_LOCK="\$RESOURCES/.global_lock"
+
+function section() {
+  in=\$1
+  cols=80
+  textStart=\$(((\$cols - \${#in}) / 2 - 1))
+
+  head=\$(printf "%-\${cols}s" "#")
+  echo "\${head// /\#}"
+  printf "#%*s" \$textStart " "
+  echo -n \$in
+  printf "%*s\n" \$((\$cols - \$textStart - \${#in} - 1)) "#"
+  echo "\${head// /\#}"
+}
+
+function get_folder() {
+  basename "\$1" | sed -e "s/^[0-9]*-//g" | sed -e "s/\.[a-zA-Z0-9]*$//g"
+}
+EOF
+}
+
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

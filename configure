@@ -4,7 +4,6 @@
 
 export CWD="$PWD"
 export SUPPORT="$CWD/support"
-source "$SUPPORT/globals"
 
 function pre-setup() {
   cd $SUPPORT
@@ -12,7 +11,8 @@ function pre-setup() {
   do
     if [[ -x "$file" ]]
     then
-      "$file"
+      "$file" "$SUPPORT" "$SUPPORT/globals"
+      read tmp
     fi
   done
   cd $CWD
@@ -25,6 +25,7 @@ function prog-setup() {
     if [[ -x "$file" ]]
     then
       "$file" "$SUPPORT" "$SUPPORT/globals"
+      read tmp
     fi
   done
   cd $CWD
