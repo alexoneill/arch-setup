@@ -1,0 +1,17 @@
+#!/bin/bash
+# iso
+# aoneill - 03/09/15
+
+BUILD_DIR=build
+ISO_URL="http://mirror.rackspace.com/archlinux/iso/latest/"
+ISO_FILE=arch.iso
+MOUNT=mnt
+
+mkdir -p $BUILD_DIR
+cd $BUILD_DIR
+
+version="$(curl "$ISO_URL" 2>/dev/null \
+           | grep ".iso\"" \
+           | sed -e "s/.*href=\"\(.*\)\".*/\1/g")"
+
+[[ ! -f "$ISO_FILE" ]] && wget "${ISO_URL}${version}" -O "$ISO_FILE"
