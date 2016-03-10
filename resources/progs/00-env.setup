@@ -21,8 +21,8 @@ function init() {
   git=git
   db=dropbox
 
-  mkdir -p "$env" "$config"
-  git clone git@github.com:/alexoneill/config.git "$env/$git"
+  mkdir -p "$config"
+  cp "$RESOURCES/config" "$env"
 
   cat "$folder/links" | while IFS= read -r line; do
     line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")

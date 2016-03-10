@@ -25,6 +25,7 @@ function init() {
 
   groupadd -f sudo
   useradd -d $homedir -m -G sudo $user
+  rm -rf $homedir/*.*
   echo "$user:$password" | chpasswd
   
   echo -n "Set your hostname, currently '$(hostname)' (nothing to ignore): "
@@ -60,6 +61,8 @@ function init() {
     --data "{\"title\": \"$(cat /etc/hostname)\", \
              \"key\": \"$(cat $homedir/.ssh/id_rsa.pub)\"}" \
     "https://api.github.com/user/keys"
+
+  echo "Configuring 
 } 
 
 function acc_get_home() {

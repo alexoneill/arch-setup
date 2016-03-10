@@ -1,0 +1,24 @@
+#!/bin/bash
+# 31-resources
+# aoneill - 03/09/16
+
+SUPPORT="$CWD/support"
+GLOBALS="$SUPPORT/globals"
+
+source "$GLOBALS"
+
+# Use utilities here
+source $SUPPORT/*-passwords
+
+# Install all the packages needed
+function init() {
+  section Resources
+
+  echo "Downloading additional resources"
+  cd $RESOURCES
+  git clone git@github.com:/alexoneill/config.git
+}
+
+# Execute init (passing arguments) if we are not sourced
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@
