@@ -13,8 +13,14 @@ source $SUPPORT/*-passwords
 function init() {
   section Accounts
 
-  echo "Configuring user account"
+  echo "Configuring root account"
   tmp=$(mktemp)
+  pw_lookup rootuser | tee $tmp >/dev/null
+  user=$(cat $tmp | head -n 1)
+  password=$(cat $tmp | tail -n 1)
+  echo "$user:$password" | chpasswd
+
+  echo "Configuring user account"
   pw_lookup archlinux | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)

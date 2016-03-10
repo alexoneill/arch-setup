@@ -16,8 +16,8 @@ function init() {
   
   folder="$(get_folder "$0")"
 
-  echo "cp \"$folder/groups.conf\" \"/etc/sudoers.d/\""
-  cp "$folder/groups.conf" "/etc/sudoers.d/"
+  echo "cp $folder/groups.conf /etc/sudoers.d/"
+  cp $folder/* /etc/sudoers.d/
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
