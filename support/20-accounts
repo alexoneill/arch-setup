@@ -27,6 +27,13 @@ function init() {
   useradd -d $homedir -m -G sudo $user
   echo "$user:$password" | chpasswd
   
+  echo -n "Set your hostname, currently '$(hostname)' (nothing to ignore): "
+  read hostname
+  if [[ "$hostname" != "" ]]
+  then
+    echo $hostname > /etc/hostname
+  fi
+
   echo "Configuring Github account"
   pw_lookup github | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)

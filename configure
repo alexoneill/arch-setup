@@ -15,8 +15,8 @@ function pre-setup() {
   do
     if [[ -x "$file" ]]
     then
-      "$file" "$SUPPORT" "$SUPPORT/globals"
-      read tmp
+      "$file"
+      pause
     fi
   done
   cd $CWD
@@ -28,8 +28,8 @@ function prog-setup() {
   do
     if [[ -x "$file" ]]
     then
-      "$file" "$SUPPORT" "$SUPPORT/globals"
-      read tmp
+      "$file"
+      pause
     fi
   done
   cd $CWD
@@ -62,20 +62,24 @@ function init() {
     echo "Currently configuring while booted from live media. Will skip"
     echo "program-specific installation. Run '$0' once booted into bare arch"
     echo "installation with root user to configure programs and"
-    echo "environment fully."
+    echo -e "environment fully.\n"
 
+    pause
     pre-setup
+    
+    echo "'reboot' and run '$0' from Arch install"
   else
     source "$SUPPORT/globals"
     
     blurb
     echo "Currently configuring while truly booted into Arch. Skipping"
-    echo "initial configuration, working on package-specific configuration."
+    echo -e "initial configuration, working on package-specific configuration."
     
+    pause
     prog-setup
-  fi
 
-  echo "'reboot' to apply all changes"
+    echo "'reboot' to apply all changes"
+  fi
 }
 
 init $@
