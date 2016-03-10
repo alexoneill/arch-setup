@@ -35,7 +35,11 @@ slim
 slim-themes
 steam
 termite
-texlive-most
+texlive-bin
+texlive-core
+texlive-langgreek
+texlive-langextra
+texlive-latexextra
 tor
 ttf-dejavu
 ttf-inconsolata
