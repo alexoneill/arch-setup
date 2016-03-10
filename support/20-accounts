@@ -61,8 +61,6 @@ function init() {
     --data "{\"title\": \"$(cat /etc/hostname)\", \
              \"key\": \"$(cat $homedir/.ssh/id_rsa.pub)\"}" \
     "https://api.github.com/user/keys"
-
-  echo "Configuring 
 } 
 
 function acc_get_home() {
