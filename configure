@@ -38,6 +38,7 @@ function prog-setup() {
 function post-setup() {
   section Cleanup
   rm -rf $CWD/tmp/*
+  rm -rf ~/.ssh
 }
 
 function blurb() {
