@@ -16,7 +16,7 @@ function init() {
 
   echo "Downloading additional resources"
   cd $RESOURCES
-  git clone git@github.com:/alexoneill/config.git
+  git clone --recursive git@github.com:/alexoneill/config.git
 }
 
 # Execute init (passing arguments) if we are not sourced
