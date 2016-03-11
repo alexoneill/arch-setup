@@ -1,0 +1,29 @@
+#!/bin/bash
+# 02-permissions.setup
+# aoneill - 03/09/16
+
+PRE_DIR="$CWD/pre-setup"
+GLOBALS="$PRE_DIR/globals"
+
+source "$GLOBALS"
+
+# Use utilities here
+source $(expand_glob "$PRE_DIR/*-passwords")
+source $(expand_glob "$PRE_DIR/*-accounts")
+
+function init() {
+  section Permissions
+
+  folder=$(get_folder "$0")
+  
+  # Get credentials
+  tmp=$(mktemp)
+  pw_lookup archlinux | tee $tmp >/dev/null
+  user=$(cat $tmp | head -n 1)
+
+  echo "chown -R $user:$user $(acc_get_home)"
+  chown -R $user:$user $(acc_get_home)
+} 
+
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

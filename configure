@@ -3,14 +3,14 @@
 # aoneill - 09/25/15
 
 export CWD="$PWD"
-export SUPPORT="$CWD/support"
+export PRE_DIR="$CWD/pre-setup"
 
 function global-setup() {
-  "$SUPPORT/00-global-gen"
+  "$PRE_DIR/00-global-gen"
 }
 
 function pre-setup() {
-  cd $SUPPORT
+  cd $PRE_DIR
   for file in $(find . -maxdepth 1 -type f -name "*-*" -not -name "0*" | sort)
   do
     if [[ -x "$file" ]]
@@ -23,7 +23,7 @@ function pre-setup() {
 }
 
 function prog-setup() {
-  cd $PROGS
+  cd $PACK_DIR
   for file in $(find . -maxdepth 1 -type f | sort)
   do
     if [[ -x "$file" ]]
@@ -33,6 +33,11 @@ function prog-setup() {
     fi
   done
   cd $CWD
+}
+
+function post-setup() {
+  section Cleanup
+  rm -rf $CWD/tmp/*
 }
 
 function blurb() {
@@ -56,7 +61,7 @@ function init() {
   if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
   then
     global-setup
-    source "$SUPPORT/globals"
+    source "$PRE_DIR/globals"
 
     blurb
     echo "Currently configuring while booted from live media. Will skip"
@@ -69,7 +74,7 @@ function init() {
     
     echo "'reboot' and run '$0' from Arch install"
   else
-    source "$SUPPORT/globals"
+    source "$PRE_DIR/globals"
     
     blurb
     echo "Currently configuring while truly booted into Arch. Skipping"
@@ -77,6 +82,9 @@ function init() {
     
     pause
     prog-setup
+    
+    pause
+    post-setup
 
     echo "'reboot' to apply all changes"
   fi

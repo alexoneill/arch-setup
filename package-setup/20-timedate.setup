@@ -1,0 +1,33 @@
+#!/bin/bash
+# 20-timedate.setup
+# aoneill - 03/09/16
+
+PRE_DIR="$CWD/pre-setup"
+GLOBALS="$PRE_DIR/globals"
+
+source "$GLOBALS"
+
+# Use utilities here
+source $(expand_glob "$PRE_DIR/*-passwords")
+source $(expand_glob "$PRE_DIR/*-accounts")
+
+function init() {
+  section "Time and Date"
+
+  folder=$(get_folder "$0")
+  
+  echo -n "Choose a valid timezone (America/New_York, America/Chicago, ...): "
+  read zone
+
+  while [[ "$zone" == "" \
+           || "$(timedatectl list-timezones | grep "$zone")" == "" ]]
+  do
+    echo -n "Invalid timezone. Choose another: "
+    read zone
+  done
+
+  timedatectl set-timezone $zone
+} 
+
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

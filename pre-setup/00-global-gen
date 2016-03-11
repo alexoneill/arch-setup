@@ -9,12 +9,13 @@ function init() {
     cwd=$CWD
   fi
 
-  cat << EOF > "$cwd/support/globals"
+  cat << EOF > "$cwd/pre-setup/globals"
 export RESOURCES="$cwd/resources"
-export PASSWD_FILE=$(mktemp -p "$cwd/support/tmp")
-export HOMEDIR_FILE=$(mktemp -p "$cwd/support/tmp")
-export WIFI_IFACE_FILE=$(mktemp -p "$cwd/support/tmp")
-export PROGS="\$RESOURCES/progs"
+export PACK_DIR="$cwd/package-setup"
+
+export PASSWD_FILE=$(mktemp -p "$cwd/tmp")
+export HOMEDIR_FILE=$(mktemp -p "$cwd/tmp")
+export WIFI_IFACE_FILE=$(mktemp -p "$cwd/tmp")
 
 function section() {
   in=\$1

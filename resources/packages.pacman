@@ -3,6 +3,7 @@ bash-completion
 coreutils
 cronie
 cups
+dialog
 dmenu
 dosfstools
 evince
@@ -48,6 +49,7 @@ unzip
 valgrind
 vim
 wget
+wpa_actiond
 wpa_supplicant
 xorg-server
 xorg-server-utils
