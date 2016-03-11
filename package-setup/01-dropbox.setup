@@ -37,6 +37,9 @@ function init() {
     echo "ln -s $src $link"
     eval "ln -s $src $link"
   done
+
+  # Update databases
+  fc-cache
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
