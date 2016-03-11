@@ -1,0 +1,10 @@
+dmenu
+dosfstools
+gcc-libs
+i3
+openssh
+pacman
+slim
+slim-themes
+xorg-server
+xorg-server-utils

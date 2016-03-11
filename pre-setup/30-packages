@@ -49,19 +49,26 @@ Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
   pacman -Sy
 
   # Install standard packages
-  echo "Installing packages for pacman..."
-  file="$RESOURCES/packages.pacman"
-  pacman --noconfirm -S $(cat "$file")
+  dir="$RESOURCES/pacman"
+  for file in $(find $dir -maxdepth 1 -type f | sort)
+  do
+    section "Packages -- pacman / $file"
+    pacman --noconfirm -S $(cat "$file")
+  done
 
-  # Install needed packages for future use
+  # Install needed packages to use yaourt
   makepkg-patch
   aurShim package-query
   aurShim yaourt
   
   # Installing community packages
   echo "Installing packages for yaourt..."
-  file="$RESOURCES/packages.yaourt"
-  yaourt --noconfirm -S $(cat "$file")
+  dir="$RESOURCES/yaourt"
+  for file in $(find $dir -maxdepth 1 -type f | sort)
+  do
+    section "Packages -- yaourt / $file"
+    yaourt --noconfirm -S $(cat "$file")
+  done
 
   # Revert changes to makepkg
   pacman --noconfirm -S pacman
