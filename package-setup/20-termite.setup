@@ -16,10 +16,30 @@ function init() {
   
   folder="$(get_folder "$0")"
 
-  mkdir -p $(acc_get_home)/.config/termite
+  if [[ ! -d "$(acc_get_home)/.config/termite" ]]
+  then
+    echo "mkdir -p $(acc_get_home)/.config/termite"
+    mkdir -p $(acc_get_home)/.config/termite
+  fi
+
   cd $(acc_get_home)/.config/termite
-  echo "ln -s \"config-inconsolata\" \"config\""
-  ln -s "config-inconsolata" "config"
+  src=config-operator
+  link=config
+
+  if [[ ! -h "$link" ]]
+    if [[ -e "$link" ]]
+    then
+      rm -rf "$link"
+    fi
+
+    echo "ln -s $src $link"
+    ln -s $src $link
+  elif [[ "$(readlink -f $link)" != "$(readlink -f $src)" ]]
+    rm "$link"
+    
+    echo "ln -s $src $link"
+    ln -s $src $link
+  fi
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

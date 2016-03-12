@@ -21,21 +21,44 @@ function init() {
   pw_lookup archlinux | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
 
-  systemctl enable dropbox@$user.service
-  systemctl start dropbox@$user.service
+  if [[ "$(systemctl is-enabled dropbox@$user.service)" != "enabled" ]]
+  then
+    systemctl enable dropbox@$user.service
+    systemctl start dropbox@$user.service
+  fi
 
-  mkdir -p $(acc_get_home)/.data
+  if [[ ! -d "$(acc_get_home)/.data" ]]
+  then
+    echo "mkdir -p $(acc_get_home)/.data"
+    mkdir -p $(acc_get_home)/.data
+  fi
 
   cat "$folder/links" | while IFS= read -r line; do
     line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
     link=$(echo $line | awk '{ print $1; }')
     src=$(echo $line | awk '{ print $2; }')
 
-    echo "mkdir -p $(dirname $link)"
-    mkdir -p $(dirname $link)
+    # Handle various edge cases
+    if [[ ! -d "$(dirname $link)" ]]
+    then
+      echo "mkdir -p $(dirname $link)"
+      mkdir -p $(dirname $link)
+    fi
 
-    echo "ln -s $src $link"
-    eval "ln -s $src $link"
+    if [[ ! -h "$link" ]]
+      if [[ -e "$link" ]]
+      then
+        rm -rf "$link"
+      fi
+
+      echo "ln -s $src $link"
+      eval "ln -s $src $link"
+    elif [[ "$(readlink -f $link)" != "$(readlink -f $src)" ]]
+      rm "$link"
+      
+      echo "ln -s $src $link"
+      ln -s $src $link
+    fi
   done
 
   # Update databases

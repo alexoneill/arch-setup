@@ -16,14 +16,17 @@ function init() {
 
   folder="$(get_folder "$0")"
 
-  systemctl enable org.cups.cupsd.service
-  systemctl start org.cups.cupsd.service
+  if [[ "$(systemctl is-enabled org.cups.cupsd.service)" != "enabled" ]]
+  then
+    systemctl enable org.cups.cupsd.service
+    systemctl start org.cups.cupsd.service
+  fi
 
   cat "$folder/printers" | while IFS= read -r line; do
     printer=$(echo $line | awk '{ print $1; }')
     lpd=$(echo $line | awk '{ print $2; }')
     file=$(echo $line | awk '{ print $3; }')
-    
+
     echo "Configuring $printer..."
 
     lpadmin -p "$printer" -E -v "$lpd" -m "$folder/ppd/$file"

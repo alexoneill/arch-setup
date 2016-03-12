@@ -17,50 +17,73 @@ function init() {
   folder="$(get_folder "$0")"
 
   ifaces="$(mktemp)"
-  ip link | grep "^[0-9]:" | sed -e "s/^.*: \(.*\): .*/\1/g" > $ifaces
-  device="$(grep wlp $ifaces | head -n 1)"
-
-  echo "Known interfaces: $(echo "$(cat $ifaces)")"
-  echo "Assuming '$device' for wireless functionality"
-  echo -n "Give alternate device (nothing means '$device' is okay): "
-  read alt_dev
-  while [[ "$alt_dev" != "" && "$(grep "^$alt_dev\$" $ifaces)" == "" ]]
-  do
-    echo -n "Invalid device. Choose another: "
-    read alt_dev
-  done
-
-  if [[ "$alt_dev" != "" ]]
+  if [[ "$(find /etc/netctl -maxdepth 1 -type f | wc -l)" == "0" ]]
   then
-    device="$alt_dev"
+    ip link | grep "^[0-9]:" | sed -e "s/^.*: \(.*\): .*/\1/g" > $ifaces
+    device="$(grep wlp $ifaces | head -n 1)"
+  else
+    find /etc/netctl -maxdepth 1 -type f \
+      | xargs cat \
+      | grep "^Interface=" \
+      | sed -e "s/Interface=//g" > $ifaces
+  fi
+
+  if [[ "$(wc -l $ifaces)" == "0" ]]
+  then
+    echo "Uh oh! There are no wireless interfaces. Skipping..."
+    return
+  elif [[ "$(wc -l $ifaces)" != "1" ]]
+    echo "Known interfaces: $(echo "$(cat $ifaces)")"
+    echo "Assuming '$device' for wireless functionality"
+    echo -n "Give alternate device (nothing means '$device' is okay): "
+    read alt_dev
+    while [[ "$alt_dev" != "" && "$(grep "^$alt_dev\$" $ifaces)" == "" ]]
+    do
+      echo -n "Invalid device. Choose another: "
+      read alt_dev
+    done
+
+    if [[ "$alt_dev" != "" ]]
+    then
+      device="$alt_dev"
+    fi
+  else
+    device=$(cat $ifaces)
   fi
 
   # Setup for further lookup
   echo "$device" > $WIFI_IFACE_FILE
-  rm $ifaces
 
-  echo "Using '$device' for wireless functionality"
-  systemctl enable netctl-auto@$device.service
+  if [[ "$(systemctl is-enabled netctl-auto@$device.service)" != "enabled" ]]
+  then
+    echo "Using '$device' for wireless functionality"
+    systemctl enable netctl-auto@$device.service
+    systemctl start netctl-auto@$device.service
+  fi
 
   # Ignore profiles we already have credentials for
   for file in $(find "$folder/" -type f -not -name "cmu-secure"\
                                         -not -name "eduroam")
   do
-    tmp=$(mktemp)
-    cat "$file" | sed -e "s/\$INTERFACE/$device/g" | tee $tmp >/dev/null
-     
-    if [[ "$(grep "\$PASSWORD" $tmp)" != "" ]]
+      if [[ ! -f "/etc/netctl/$(basename $file)" 
+        || "$(grep "Interface=$device" /etc/netctl/$(basename $file))" == "" ]]
     then
-      echo "Configuring $file"
-      echo -n "Network password: "
-      read pass
-      
-      otherTmp=$(mktemp)
-      cat $tmp | sed -e "s/\$PASSWORD/$pass/g" | tee $otherTmp >/dev/null
-      cp $otherTmp $tmp
-    fi
+      tmp=$(mktemp)
+      cat "$file" | sed -e "s/\$INTERFACE/$device/g" | tee $tmp >/dev/null
+       
+      if [[ "$(grep "\$PASSWORD" $tmp)" != "" ]]
+      then
+        echo "Configuring $file"
+        echo -n "Network password: "
+        read pass
+        
+        otherTmp=$(mktemp)
+        cat $tmp | sed -e "s/\$PASSWORD/$pass/g" | tee $otherTmp >/dev/null
+        cp $otherTmp $tmp
+      fi
 
-    cp $tmp "/etc/netctl/$(basename $file)"
+      cp $tmp "/etc/netctl/$(basename $file)"
+    fi
   done
     
   # Handle CMU Secure + Eduroam case (given password earlier)

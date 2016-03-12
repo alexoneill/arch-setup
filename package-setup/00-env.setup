@@ -22,18 +22,63 @@ function init() {
   db=dropbox
 
   mkdir -p "$env" "$config"
-  cp "$RESOURCES/config" "$env/$git"
+  oldPwd=$(pwd)
+  cd $env/$git
+  
+  if [[ -d "$env/$git" ]]
+  then
+    
+    git status | grep "nothing to commit" > /dev/null 2>&1;
+    if [ "$?" == "0" ]
+    then
+      echo "Detected changes to environment!"
+      echo "Showing diff..."
+      sleep 2
+      git diff
+      git commit
+      if [ "$?" == "0" ]
+      then
+        git pull
+        git push
+      fi
+    else
+      git pull
+    fi
+    
+    cd $oldPwd
+  else
+    cd $oldPwd
+    cp "$RESOURCES/config" "$env/$git"
+  fi
+
+
 
   cat "$folder/links" | while IFS= read -r line; do
     line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
     link=$(echo $line | awk '{ print $1; }')
     src=$(echo $line | awk '{ print $2; }')
 
-    echo "mkdir -p $(dirname $link)"
-    mkdir -p $(dirname $link)
+    # Handle various edge cases
+    if [[ ! -d "$(dirname $link)" ]]
+    then
+      echo "mkdir -p $(dirname $link)"
+      mkdir -p $(dirname $link)
+    fi
 
-    echo "ln -s $src $link"
-    eval "ln -s $src $link"
+    if [[ ! -h "$link" ]]
+      if [[ -e "$link" ]]
+      then
+        rm -rf "$link"
+      fi
+
+      echo "ln -s $src $link"
+      eval "ln -s $src $link"
+    elif [[ "$(readlink -f $link)" != "$(readlink -f $src)" ]]
+      rm "$link"
+      
+      echo "ln -s $src $link"
+      ln -s $src $link
+    fi
   done
 } 
 
