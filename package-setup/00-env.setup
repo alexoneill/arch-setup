@@ -22,21 +22,20 @@ function init() {
   db=dropbox
 
   mkdir -p "$env" "$config"
-  oldPwd=$(pwd)
-  cd $env/$git
-  
   if [[ -d "$env/$git" ]]
   then
+    oldPwd=$(pwd)
+    cd $env/$git
     
     git status | grep "nothing to commit" > /dev/null 2>&1;
-    if [ "$?" == "0" ]
+    if [[ "$?" == "0" ]]
     then
       echo "Detected changes to environment!"
       echo "Showing diff..."
       sleep 2
       git diff
       git commit
-      if [ "$?" == "0" ]
+      if [[ "$?" == "0" ]]
       then
         git pull
         git push
@@ -47,11 +46,8 @@ function init() {
     
     cd $oldPwd
   else
-    cd $oldPwd
-    cp "$RESOURCES/config" "$env/$git"
+    cp -r "$RESOURCES/config" "$env/$git"
   fi
-
-
 
   cat "$folder/links" | while IFS= read -r line; do
     line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
@@ -66,6 +62,7 @@ function init() {
     fi
 
     if [[ ! -h "$link" ]]
+    then
       if [[ -e "$link" ]]
       then
         rm -rf "$link"
@@ -74,6 +71,7 @@ function init() {
       echo "ln -s $src $link"
       eval "ln -s $src $link"
     elif [[ "$(readlink -f $link)" != "$(readlink -f $src)" ]]
+    then
       rm "$link"
       
       echo "ln -s $src $link"

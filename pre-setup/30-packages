@@ -52,7 +52,7 @@ Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
   dir="$RESOURCES/pacman"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
-    section "Packages -- pacman / $file"
+    section "Packages -- pacman / $(basename $file)"
     pacman --noconfirm -S $(cat "$file")
   done
 
@@ -66,7 +66,7 @@ Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
   dir="$RESOURCES/yaourt"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
-    section "Packages -- yaourt / $file"
+    section "Packages -- yaourt / $(basename $file)"
     yaourt --noconfirm -S $(cat "$file")
   done
 

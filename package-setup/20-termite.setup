@@ -27,6 +27,7 @@ function init() {
   link=config
 
   if [[ ! -h "$link" ]]
+  then
     if [[ -e "$link" ]]
     then
       rm -rf "$link"
@@ -35,6 +36,7 @@ function init() {
     echo "ln -s $src $link"
     ln -s $src $link
   elif [[ "$(readlink -f $link)" != "$(readlink -f $src)" ]]
+  then
     rm "$link"
     
     echo "ln -s $src $link"

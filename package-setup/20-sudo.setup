@@ -16,7 +16,7 @@ function init() {
   
   folder="$(get_folder "$0")"
 
-  echo "cp $folder/groups.conf /etc/sudoers.d/"
+  echo "cp $folder/* /etc/sudoers.d/"
   cp $folder/* /etc/sudoers.d/
 } 
 

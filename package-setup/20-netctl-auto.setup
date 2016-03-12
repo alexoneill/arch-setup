@@ -33,6 +33,7 @@ function init() {
     echo "Uh oh! There are no wireless interfaces. Skipping..."
     return
   elif [[ "$(wc -l $ifaces)" != "1" ]]
+  then
     echo "Known interfaces: $(echo "$(cat $ifaces)")"
     echo "Assuming '$device' for wireless functionality"
     echo -n "Give alternate device (nothing means '$device' is okay): "
