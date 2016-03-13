@@ -23,6 +23,8 @@ function init() {
 
   if [[ "$(systemctl is-enabled dropbox@$user.service)" != "enabled" ]]
   then
+    cat "$folder/unit" | EDITOR=tee systemctl edit dropbox@$user.service 
+
     systemctl enable dropbox@$user.service
     systemctl start dropbox@$user.service
   fi
