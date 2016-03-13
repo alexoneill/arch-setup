@@ -21,7 +21,14 @@ function init() {
   git=git
   db=dropbox
 
-  mkdir -p "$env" "$config"
+  cat "$folder/folders" | while IFS= read -r line; do
+    line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
+    if [[ ! -d "$line" ]]
+    then
+      mkdir -p $line
+    fi
+  done
+
   if [[ -d "$env/$git" ]]
   then
     oldPwd=$(pwd)

@@ -1,6 +1,6 @@
 ~/.bashrc ~/.env/git/bash/.bashrc
 ~/.bashrc.d ~/.env/git/bash/.bashrc.d
-~/.bin ~/.env/git/bash/.bin
+~/.bin-git ~/.env/git/bash/.bin
 ~/.config/termite ~/.env/git/termite
 ~/.gitconfig ~/.env/git/git/.gitconfig
 ~/.i3 ~/.env/git/i3/.i3

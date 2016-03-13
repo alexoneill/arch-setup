@@ -1,3 +1,4 @@
 ~/dropbox ~/.data/Dropbox
 ~/.env/dropbox ~/dropbox/Programming/config
+~/.bin-db ~/.env/dropbox/bin
 ~/.local/share/fonts ~/.env/dropbox/fonts
