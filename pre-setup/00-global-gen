@@ -17,22 +17,35 @@ export PASSWD_FILE=$(mktemp -p "$cwd/tmp")
 export HOMEDIR_FILE=$(mktemp -p "$cwd/tmp")
 export WIFI_IFACE_FILE=$(mktemp -p "$cwd/tmp")
 
+function tell() {
+  if [[ "\$QUIET" != 1 ]]
+  then
+    echo \$@
+  fi
+}
+
 function section() {
   in=\$1
   cols=80
   textStart=\$(((\$cols - \${#in}) / 2 - 1))
-
   head=\$(printf "%-\${cols}s" "#")
-  echo "\${head// /\#}"
-  printf "#%*s" \$textStart " "
-  echo -n \$in
-  printf "%*s\n" \$((\$cols - \$textStart - \${#in} - 1)) "#"
-  echo "\${head// /\#}"
+
+  if [[ "\$QUIET" != 1 ]]
+  then
+    echo "\${head// /\#}"
+    printf "#%*s" \$textStart " "
+    echo -n \$in
+    printf "%*s\n" \$((\$cols - \$textStart - \${#in} - 1)) "#"
+    echo "\${head// /\#}"
+  fi
 }
 
 function pause() {
-  echo -n "Press ENTER to continue..."
-  read ignored
+  if [[ "\$QUIET" != 1 ]]
+  then
+    echo -n "Press ENTER to continue..."
+    read ignored
+  fi
 }
 
 function get_folder() {
@@ -43,6 +56,45 @@ function expand_glob() {
   list=(\$1)
   echo "\${list[@]}"
 }
+
+function mkdir_tell() {
+  if [[ ! -d "\$1" ]]
+  then
+    tell "mkdir -p \$1"
+    mkdir -p \$1
+  fi
+}
+
+function ln_tell() {
+  if [[ "\$#" != "2" ]]
+  then
+    ln
+    return
+  fi
+
+  # Handle various edge cases
+  mkdir_tell \$(dirname \$2)
+
+  readlink -f \$1
+  readlink -f \$2
+
+  if [[ ! -h "\$2" ]]
+  then
+    if [[ -e "\$2" ]]
+    then
+      rm -rf "\$2"
+    fi
+
+    tell "ln -s \$1 \$2"
+    ln -s \$1 \$2
+  elif [[ "\$(readlink -f \$2)" != "\$(readlink -f \$1)" ]]
+  then
+    rm "\$2"
+    
+    tell "ln -s \$1 \$2"
+    ln -s \$1 \$2
+  fi
+} 
 EOF
 }
 

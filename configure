@@ -58,7 +58,13 @@ function init() {
     echo "Need root-level access. Run as root!"
     exit
   fi
-  
+
+  export QUIET=0
+  if [[ "$1" == "--quiet" ]]
+  then
+    export QUIET=1
+  fi
+
   if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
   then
     global-setup
