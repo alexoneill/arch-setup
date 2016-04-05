@@ -12,6 +12,7 @@ function init() {
   cat << EOF > "$cwd/pre-setup/globals"
 export RESOURCES="$cwd/resources"
 export PACK_DIR="$cwd/package-setup"
+export POST_DIR="$cwd/post-setup"
 
 export INFO="\$RESOURCES/info"
 export PASSWD_FILE=\$INFO/passwords

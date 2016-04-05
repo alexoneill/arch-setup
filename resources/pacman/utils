@@ -7,6 +7,7 @@ hfsprogs
 hunspell-en
 ifuse
 lshw
+rsync
 tor
 unrar
 unzip

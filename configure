@@ -36,8 +36,21 @@ function prog-setup() {
 }
 
 function post-setup() {
+  cd $POST_DIR
+  for file in $(find . -maxdepth 1 -type f | sort)
+  do
+    if [[ -x "$file" ]]
+    then
+      "$file"
+      pause
+    fi
+  done
+  cd $CWD
+}
+
+function cleanup() {
   section Cleanup
-  rm -rf $CWD/tmp/*
+
   rm -rf ~/.ssh
 }
 
@@ -86,12 +99,11 @@ function init() {
     blurb
     echo "Currently configuring while truly booted into Arch. Skipping"
     echo -e "initial configuration, working on package-specific configuration."
-    
     pause
+    
     prog-setup
-    
-    pause
     post-setup
+    cleanup
 
     echo "'reboot' to apply all changes"
   fi

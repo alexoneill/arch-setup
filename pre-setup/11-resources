@@ -7,9 +7,6 @@ GLOBALS="$PRE_DIR/globals"
 
 source "$GLOBALS"
 
-# Use utilities here
-source $PRE_DIR/*-passwords
-
 # Install all the packages needed
 function init() {
   section Resources

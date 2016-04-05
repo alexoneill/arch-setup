@@ -7,9 +7,6 @@ GLOBALS="$PRE_DIR/globals"
 
 source "$GLOBALS"
 
-# Use utilities here
-source $PRE_DIR/*-passwords
-
 # Patch makepkg to run as root (will be reverted later)
 function makepkg-patch() {
   patch /usr/bin/makepkg < "$RESOURCES/makepkg-patch.diff"
