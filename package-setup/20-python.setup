@@ -1,0 +1,19 @@
+#!/bin/bash
+# 20-python.setup
+# aoneill - 04/05/16
+
+PRE_DIR="$CWD/pre-setup"
+GLOBALS="$PRE_DIR/globals"
+
+source "$GLOBALS"
+
+function init() {
+  section ranger
+  
+  python=/usr/bin/python
+  rm $python
+  ln -s ${python}2.7 $python
+} 
+
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@
