@@ -2,6 +2,7 @@ bash-completion
 coreutils
 cronie
 dialog
+expect
 hfsprogs
 hunspell-en
 ifuse

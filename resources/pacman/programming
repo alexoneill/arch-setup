@@ -1,6 +1,7 @@
 gdb
 git
 npm
+rlwrap
 sassc
 texlive-bin
 texlive-core

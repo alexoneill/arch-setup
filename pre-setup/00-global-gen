@@ -13,9 +13,10 @@ function init() {
 export RESOURCES="$cwd/resources"
 export PACK_DIR="$cwd/package-setup"
 
-export PASSWD_FILE=$(mktemp -p "$cwd/tmp")
-export HOMEDIR_FILE=$(mktemp -p "$cwd/tmp")
-export WIFI_IFACE_FILE=$(mktemp -p "$cwd/tmp")
+export INFO="\$RESOURCES/info"
+export PASSWD_FILE=\$INFO/passwords
+export HOMEDIR_FILE=\$INFO/homedir
+export WIFI_IFACE_FILE=\$INFO/wifi
 
 function tell() {
   if [[ "\$QUIET" != 1 ]]

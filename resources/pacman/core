@@ -6,5 +6,6 @@ openssh
 pacman
 slim
 slim-themes
+xf86-input-libinput
 xorg-server
 xorg-server-utils
