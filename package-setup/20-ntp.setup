@@ -1,0 +1,21 @@
+#!/bin/bash
+# 20-ntp.setup
+# aoneill - 04/21/16
+
+PRE_DIR="$CWD/pre-setup"
+GLOBALS="$PRE_DIR/globals"
+
+source "$GLOBALS"
+
+function init() {
+  section "Time and Date"
+  
+  echo systemctl enable ntpd.service
+  systemctl enable ntpd.service
+  
+  echo timedatectl set-timezone UTC
+  timedatectl set-timezone UTC
+} 
+
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@
