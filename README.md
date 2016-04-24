@@ -23,8 +23,8 @@ internet connection as well as a disk partitioned to your heart's content.
 
 ### Install base packages
 
-Mount your Linux partition(s) on and within `/mnt` (including `/mnt/boot`).
-Next, preform the following command to prepare `/mnt`:
+Mount your Linux partition on `/mnt`. Next, preform the following command 
+to prepare `/mnt`:
 
 ```bash
 pacstrap /mnt base base-devel git openssh
@@ -40,7 +40,8 @@ arch-chroot /mnt /bin/bash
 ### Generate filesystem information
 
 Ensuring *all* relevant partitions are mounted within the filesystem, 
-generate filesystem information with the following command:
+(including `/mnt/boot`), generate filesystem information with the following
+command:
 
 ```bash
 genfstab >> /etc/fstab
