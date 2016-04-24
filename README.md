@@ -37,7 +37,7 @@ Ensuring *all* relevant partitions are mounted within the filesystem,
 command:
 
 ```bash
-genfstab >> /etc/fstab
+genfstab /mnt >> /mnt/etc/fstab
 ```
 
 ### Chroot
