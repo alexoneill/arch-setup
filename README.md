@@ -30,13 +30,6 @@ to prepare `/mnt`:
 pacstrap /mnt base base-devel git openssh
 ```
 
-Finally, `chroot` into your fresh install. `/bin/bash` is supplied for a richer
-command-line interface:
-
-```bash
-arch-chroot /mnt /bin/bash
-```
-
 ### Generate filesystem information
 
 Ensuring *all* relevant partitions are mounted within the filesystem, 
@@ -45,6 +38,15 @@ command:
 
 ```bash
 genfstab >> /etc/fstab
+```
+
+### Chroot
+
+Finally, `chroot` into your fresh install. `/bin/bash` is supplied for a richer
+command-line interface:
+
+```bash
+arch-chroot /mnt /bin/bash
 ```
 
 ### Run configuration script
