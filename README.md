@@ -17,22 +17,21 @@ Installation
 Pre-Boot
 --------
 
-Follow the [pre-install instructions](https://wiki.archlinux.org/index.php/Installation_guide#Pre-installation).
-The following instructions assume you have a working internet connection as
-well as a disk partitioned to your heart's content.
+Follow the [pre-install instructions](https://wiki.archlinux.org/index.php/Installation_guide#Pre-installation)
+on the Arch Wiki. The following instructions assume you have a working
+internet connection as well as a disk partitioned to your heart's content.
 
 ### Install base packages
 
-Mount your Linux partition(s) within `/mnt` (including `/mnt/boot`).
-Next, preform the following command to prepare `/mnt` for the configuration
-script:
+Mount your Linux partition(s) on and within `/mnt` (including `/mnt/boot`).
+Next, preform the following command to prepare `/mnt`:
 
 ```bash
 pacstrap /mnt base base-devel git openssh
 ```
 
 Finally, `chroot` into your fresh install. `/bin/bash` is supplied for a richer
-commandline interface:
+command-line interface:
 
 ```bash
 arch-chroot /mnt /bin/bash
@@ -40,7 +39,7 @@ arch-chroot /mnt /bin/bash
 
 ### Generate filesystem information
 
-Ensuring *all* relevant partitions are mounted within the filesystem, then 
+Ensuring *all* relevant partitions are mounted within the filesystem, 
 generate filesystem information with the following command:
 
 ```bash
@@ -62,7 +61,7 @@ cd arch-setup
 ./configure
 ```
 
-Finally, reboot, and remove the installation medium. If everything worked,
+Finally, `reboot`, and remove the installation medium. If everything worked,
 your system should boot normally and you may continue onto the next section.
 
 Natively Booted
@@ -76,5 +75,5 @@ cd arch-setup
 ./configure
 ```
 
-Reboot, again. Once the system starts up, you should be presented with a
-graphical login and the system should be fully configured!
+Reboot, again. Once the system starts up, you will be presented with a
+graphical login and the system will be fully configured!
