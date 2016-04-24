@@ -88,8 +88,8 @@ function init() {
     echo "program-specific installation. Run '$0' once booted into bare arch"
     echo "installation with root user to configure programs and"
     echo -e "environment fully.\n"
-
     pause
+
     pre-setup
     
     echo "'reboot' and run '$0' from Arch install"

@@ -4,6 +4,7 @@ cronie
 dialog
 expect
 hfsprogs
+htop
 hunspell-en
 ifuse
 lshw
