@@ -61,13 +61,14 @@
 *Throughput:	"1"
 *LandscapeOrientation: Plus90
 *TTRasterizer:	Type42
-*1284DeviceID: "MFG:Hewlett-Packard;MDL:HP LaserJet 4100 Series;CMD:PJL,MLC,POSTSCRIPT,PCLXL,PJL,PCL;DES:Hewlett-Packard LaserJet 4100 Series;DRV:DPostscript,R0,M0,TP;"
+*1284DeviceID: "MFG:Hewlett-Packard;MDL:HP LaserJet 4100 Series;CMD:PJL,MLC,POSTSCRIPT,PCLXL,PJL,P;DES:Hewlett-Packard LaserJet 4100 Series;DRV:DPostscript,R0,M0,F1,P0,TP;"
 
 *driverName Postscript: ""
 *driverType P/PostScript: ""
 *driverUrl: "http://partners.adobe.com/public/developer/ps/index_specs.html"
 *driverObsolete: False
 *driverManufacturerSupplied: False
+*driverFreeSoftware: True
 
 
 
@@ -304,7 +305,7 @@
 
 *OpenUI *Duplex/Double-Sided Printing: PickOne
 *OrderDependency: 130 AnySetup *Duplex
-*DefaultDuplex: DuplexNoTumble
+*DefaultDuplex: None
 *Duplex DuplexNoTumble/Long Edge (Standard): "<</Duplex true /Tumble false>>setpagedevice"
 *Duplex DuplexTumble/Short Edge (Flip): "<</Duplex true /Tumble true>>setpagedevice"
 *Duplex None/Off: "<</Duplex false>>setpagedevice"

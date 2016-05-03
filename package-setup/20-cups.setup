@@ -29,7 +29,10 @@ function init() {
 
     echo "Configuring $printer..."
 
-    lpadmin -p "$printer" -E -v "$lpd" -m "$folder/ppd/$file"
+    lpadmin -p "$printer" -E -v "$lpd" -P "$folder/ppd/$file"
+    lpoptions -p "$printer" -o printer-is-shared=false \
+                            -o sides=two-sided-long-edge
+
     cupsaccept "$printer"
     cupsenable "$printer"
   done
