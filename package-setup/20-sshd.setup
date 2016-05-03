@@ -1,0 +1,18 @@
+#!/bin/bash
+# 20-sshd.setup
+# aoneill - 05/03/16
+
+PRE_DIR="$CWD/pre-setup"
+GLOBALS="$PRE_DIR/globals"
+
+source "$GLOBALS"
+
+function init() {
+  section "SSH Daemon"
+  
+  echo "systemctl enable sshd.service"
+  systemctl enable sshd.service
+} 
+
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@
