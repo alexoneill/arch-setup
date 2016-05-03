@@ -7,5 +7,6 @@ pacman
 slim
 slim-themes
 xf86-input-libinput
+xf86-input-synaptics
 xorg-server
 xorg-server-utils

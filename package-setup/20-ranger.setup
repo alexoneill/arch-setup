@@ -23,6 +23,9 @@ function init() {
 > \"$ranger\""
   tail -n +2 $ranger | cat <(echo "#!/usr/bin/python3 -O") - > "$tmp"
   mv "$tmp" "$ranger"
+
+  echo "chmod 755 $ranger"
+  chmod 755 $ranger
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

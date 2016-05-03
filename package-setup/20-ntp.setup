@@ -10,10 +10,10 @@ source "$GLOBALS"
 function init() {
   section "Time and Date"
   
-  echo systemctl enable ntpd.service
+  echo "systemctl enable ntpd.service"
   systemctl enable ntpd.service
   
-  echo timedatectl set-timezone UTC
+  echo "timedatectl set-timezone UTC"
   timedatectl set-timezone UTC
 } 
 
