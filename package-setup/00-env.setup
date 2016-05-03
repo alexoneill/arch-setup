@@ -53,7 +53,28 @@ function init() {
     
     cd $oldPwd
   else
+    echo "cp -r \"$RESOURCES/config\" \"$env/$git\""
     cp -r "$RESOURCES/config" "$env/$git"
+
+    cwd=$(pwd)
+    cd "$env/$git"
+    if [[ -f "./.gitmodules" ]]; then
+      cat .gitmodules \
+        | grep "path" \
+        | sed -e "s/^\s*path\s*=\s*//g" \
+        | while IFS= read -r line; do
+        slashes=$(echo "$line" | tr "/" "\n" | wc -l)
+
+        rel=".."
+        for i in $(seq 1 $((slashes - 1))); do
+          rel="$rel/.."
+        done;
+        
+        echo "echo \"gitdir: $rel/.git/modules/$line\" > \"$line/.git\""
+        echo "gitdir: $rel/.git/modules/$line" > "$line/.git"
+      done;
+    fi
+    cd $cwd
   fi
 
   cat "$folder/links" | while IFS= read -r line; do

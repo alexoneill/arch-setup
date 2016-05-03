@@ -17,6 +17,7 @@ function init() {
   url=$(git remote show origin | grep Fetch | sed -e "s/.*URL: //g")
   url=$(echo $url | sed -e "s/^https?:\/\//git@/")
 
+  echo "git clone $url $setup"
   git clone $url $setup
 
   # Run partially in the clone
