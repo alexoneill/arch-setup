@@ -8,7 +8,7 @@ GLOBALS="$PRE_DIR/globals"
 source "$GLOBALS"
 
 function init() {
-  section ranger
+  section python
   
   python=/usr/bin/python
   rm $python
