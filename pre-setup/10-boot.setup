@@ -17,7 +17,8 @@ function init() {
 
   dev=$(mount | grep "/boot" | sed -e "s|^/dev/\([a-z]\+\) .*|/dev/\1|")
   while [[ "$dev" == "" ]]; do
-    echo -n "Boot device ($(ls /dev/sd[a-z][0-9]) | tr "\n" " ")): "
+    echo -n "Boot device ($(ls /dev/sd[a-z][0-9] \
+                             | tr "\n" " ")): "
     read dev
     
     if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
@@ -40,11 +41,11 @@ function init() {
   
   for file in $(find "$folder/$ent/" -type f); do
     if [[ "$(grep -i linux $file)" != "" ]]; then
-      os=$(grep "^title\s" $file | sed -e "s/^title\s//")
+      os=$(grep "^title\s" $file | sed -e "s/^title\s\+//")
     
       while true; do
-        echo -n "Partition for \"$os\" ($(ls /dev/sd[a-z][0-9])"
-                                           | tr "\n" " "): "
+        echo -n "Partition for \"$os\" ($(ls /dev/sd[a-z][0-9] \
+                                           | tr "\n" " ")): "
         read dev
         
         if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
@@ -55,12 +56,15 @@ function init() {
       uuid=$(blkid -s PARTUUID -o value $dev)    
       tmp=$(mktemp)
       sed -e "s/PARTUUID/PARTUUID=$uuid/g" $file > $tmp
-      mv $tmp $file
+      
+      file=$(basename $file)
+      echo "mv $tmp $out/$ent/$file"
+      mv $tmp "$out/$ent/$file"
+    else
+      file=$(basename $file)
+      echo "cp $folder/$ent/$file $out/$ent/$file"
+      cp "$folder/$ent/$file" "$out/$ent/$file"
     fi
-
-    file=$(basename file)
-    echo "cp $folder/$ent/$file $out/$ent/$file"
-    cp "$folder/$ent/$file" "$out/$ent/$file"
   done
 }
 
