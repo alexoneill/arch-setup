@@ -1,0 +1,69 @@
+#!/bin/bash
+# 10-boot
+# aoneill - 02/19/16
+
+PRE_DIR="$CWD/pre-setup"
+GLOBALS="$PRE_DIR/globals"
+
+source "$GLOBALS"
+
+# Setup boot options
+function init() {
+  section Boot
+
+  # Clean up previous sections
+  echo "rm -rf /boot/*"
+  rm -rf /boot/*
+
+  dev=$(mount | grep "/boot" | sed -e "s|^/dev/\([a-z]\+\) .*|/dev/\1|")
+  while [[ "$dev" == "" ]]; do
+    echo -n "Boot device ($(ls /dev/sd[a-z][0-9]) | tr "\n" " ")): "
+    read dev
+    
+    if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
+      echo "mount $dev /boot"
+      mount $dev /boot
+    else
+      dev=
+    fi
+  done 
+
+  pacman --noconfirm -S linux
+  bootctl --no-variables --path=/boot install
+  
+  folder="$(get_folder "$0")"
+  out="/boot/loader"
+  ent="entries"
+  
+  echo "cp $folder/loader.conf $out/loader.conf"
+  cp "$folder/loader.conf" "$out/loader.conf"
+  
+  for file in $(find "$folder/$ent/" -type f); do
+    if [[ "$(grep -i linux $file)" != "" ]]; then
+      os=$(grep "^title\s" $file | sed -e "s/^title\s//")
+    
+      while true; do
+        echo -n "Partition for \"$os\" ($(ls /dev/sd[a-z][0-9])"
+                                           | tr "\n" " "): "
+        read dev
+        
+        if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
+          break
+        fi 
+      done
+      
+      uuid=$(blkid -s PARTUUID -o value $dev)    
+      tmp=$(mktemp)
+      sed -e "s/PARTUUID/PARTUUID=$uuid/g" $file > $tmp
+      mv $tmp $file
+    fi
+
+    file=$(basename file)
+    echo "cp $folder/$ent/$file $out/$ent/$file"
+    cp "$folder/$ent/$file" "$out/$ent/$file"
+  done
+}
+
+# Execute init (passing arguments) if we are not sourced
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

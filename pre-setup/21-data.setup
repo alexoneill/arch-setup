@@ -1,5 +1,5 @@
 #!/bin/bash
-# 31-resources
+# 21-data.setup
 # aoneill - 03/09/16
 
 PRE_DIR="$CWD/pre-setup"
@@ -9,10 +9,11 @@ source "$GLOBALS"
 
 # Install all the packages needed
 function init() {
-  section Resources
+  section Data
 
   echo "Downloading additional resources"
-  cd $RESOURCES
+  mkdir -p $DATA_DIR
+  cd $DATA_DIR
   git clone --recursive git@github.com:/alexoneill/config.git
 }
 

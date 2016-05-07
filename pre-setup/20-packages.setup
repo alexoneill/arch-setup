@@ -7,9 +7,11 @@ GLOBALS="$PRE_DIR/globals"
 
 source "$GLOBALS"
 
+CONFIG_DIR=$(get_folder "$0")
+
 # Patch makepkg to run as root (will be reverted later)
 function makepkg-patch() {
-  patch /usr/bin/makepkg < "$RESOURCES/makepkg-patch.diff"
+  patch /usr/bin/makepkg < "$CONFIG_DIR/makepkg-patch.diff"
 } 
 
 # Temporary method to pull packages from AUR (to install yaourt)
@@ -46,7 +48,7 @@ Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
   pacman -Sy
 
   # Install standard packages
-  dir="$RESOURCES/pacman"
+  dir="$CONFIG_DIR/pacman"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
     section "Packages -- pacman / $(basename $file)"
@@ -60,7 +62,7 @@ Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
   
   # Installing community packages
   echo "Installing packages for yaourt..."
-  dir="$RESOURCES/yaourt"
+  dir="$CONFIG_DIR/yaourt"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
     section "Packages -- yaourt / $(basename $file)"

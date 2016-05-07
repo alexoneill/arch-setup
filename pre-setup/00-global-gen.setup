@@ -10,14 +10,13 @@ function init() {
   fi
 
   cat << EOF > "$cwd/pre-setup/globals"
-export RESOURCES="$cwd/resources"
+export DATA_DIR="$cwd/data"
 export PACK_DIR="$cwd/package-setup"
 export POST_DIR="$cwd/post-setup"
 
-export INFO="\$RESOURCES/info"
-export PASSWD_FILE=\$INFO/passwords
-export HOMEDIR_FILE=\$INFO/homedir
-export WIFI_IFACE_FILE=\$INFO/wifi
+export PASSWD_FILE=\$DATA_DIR/passwords
+export HOMEDIR_FILE=\$DATA_DIR/homedir
+export WIFI_IFACE_FILE=\$DATA_DIR/wifi
 
 function tell() {
   if [[ "\$QUIET" != 1 ]]
