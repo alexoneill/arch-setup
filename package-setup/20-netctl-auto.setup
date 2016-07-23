@@ -104,6 +104,9 @@ function init() {
   cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g" \
     | sed -e "s/\$USER/$user/g" \
     | sed -e "s/\$PASSWORD/$password/g" > "/etc/netctl/$file"
+
+  # Fix completion issues
+  ln -s /usr/share/bash-completion/completions/{netctl,netctl-auto}
 } 
 
 function net_get_iface() {
