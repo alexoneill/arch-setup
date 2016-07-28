@@ -1,0 +1,8 @@
+#  .gitignore
+#  aoneill - 07/26/16
+
+# Ignore ISO build
+build/
+
+# Ignore generated data
+data/

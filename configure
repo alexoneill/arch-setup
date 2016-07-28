@@ -2,57 +2,11 @@
 # configure
 # aoneill - 09/25/15
 
-export CWD="$PWD"
-export PRE_DIR="$CWD/pre-setup"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-function global-setup() {
-  "$PRE_DIR/00-global-gen"
-}
-
-function pre-setup() {
-  cd $PRE_DIR
-  for file in $(find . -maxdepth 1 -type f -name "*-*" -not -name "0*" | sort)
-  do
-    if [[ -x "$file" ]]
-    then
-      "$file"
-      pause
-    fi
-  done
-  cd $CWD
-}
-
-function prog-setup() {
-  cd $PACK_DIR
-  for file in $(find . -maxdepth 1 -type f | sort)
-  do
-    if [[ -x "$file" ]]
-    then
-      "$file"
-      pause
-    fi
-  done
-  cd $CWD
-}
-
-function post-setup() {
-  cd $POST_DIR
-  for file in $(find . -maxdepth 1 -type f | sort)
-  do
-    if [[ -x "$file" ]]
-    then
-      "$file"
-      pause
-    fi
-  done
-  cd $CWD
-}
-
-function cleanup() {
-  section Cleanup
-
-  rm -rf ~/.ssh
-}
+# Get various tools
+SETUP="$DIR/setup"
+source "$SETUP/setup.sh"
 
 function blurb() {
   section "Alex O'Neill's Arch Customizer"  
@@ -62,7 +16,6 @@ This is intended to configure a vanilla installation of Arch Linux to be
 as close to the working copy I run on my various computers. See the README
 for more information!\n"
 }
-
 
 function init() {
   # Need root-level permissions (assuming no sudo)
@@ -78,11 +31,15 @@ function init() {
     export QUIET=1
   fi
 
+  export DRY_RUN=0
+  if [[ "$1" == "--dry-run" ]]
+  then
+    export DRY_RUN=1
+  fi
+
+  # See if we are in a chroot (installing from a key)
   if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
   then
-    global-setup
-    source "$PRE_DIR/globals"
-
     blurb
     echo "Currently configuring while booted from live media. Will skip"
     echo "program-specific installation. Run '$0' once booted into bare arch"
@@ -90,23 +47,22 @@ function init() {
     echo -e "environment fully.\n"
     pause
 
-    pre-setup
+    "$SETUP/setup.sh" $SETUP_PREP
     
     echo "'reboot' and run '$0' from Arch install"
   else
-    source "$PRE_DIR/globals"
-    
     blurb
     echo "Currently configuring while truly booted into Arch. Skipping"
     echo -e "initial configuration, working on package-specific configuration."
     pause
     
-    prog-setup
-    post-setup
-    cleanup
+    "$SETUP/setup.sh" $SETUP_PACK
+    "$SETUP/setup.sh" $SETUP_POST
 
     echo "'reboot' to apply all changes"
   fi
 }
 
-init $@
+# Run init only when run
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

@@ -1,0 +1,33 @@
+#!/bin/bash
+# 00-distribute
+# aoneill - 04/05/16
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source the driver and another part
+source "$(basename "$(pwd)").sh"
+source_part "prep" all
+
+function init() {
+  section Distribute
+
+  setup=$(acc_get_home)/.setup
+  url=$(git remote show origin | grep Fetch | sed -e "s/.*URL: //g")
+  url=$(echo $url | sed -e "s/^https?:\/\//git@/")
+
+  tell git clone $url $setup
+
+  # Run partially in the clone
+
+  # TODO: FIX
+  # backup=$DATA_DIR
+  # echo "$setup/pre-setup/00-global-gen $setup"
+  # $setup/pre-setup/00-global-gen $setup
+  # source $setup/pre-setup/globals
+  # 
+  # echo "cp -r $backup/* $DATA_DIR/"
+  # cp -r $backup/* $DATA_DIR/
+} 
+
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+source "$(basename "$(pwd)").sh"
+
+echo "$DIR"
+echo "$BASE"

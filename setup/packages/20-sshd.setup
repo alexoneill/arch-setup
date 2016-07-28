@@ -2,10 +2,8 @@
 # 20-sshd.setup
 # aoneill - 05/03/16
 
-PRE_DIR="$CWD/pre-setup"
-GLOBALS="$PRE_DIR/globals"
-
-source "$GLOBALS"
+# Source the driver
+source "$(basename "$(pwd)").sh"
 
 function init() {
   section "SSH Daemon"

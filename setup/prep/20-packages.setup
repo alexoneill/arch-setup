@@ -2,16 +2,14 @@
 # 30-packages
 # aoneill - 02/19/16
 
-PRE_DIR="$CWD/pre-setup"
-GLOBALS="$PRE_DIR/globals"
-
-source "$GLOBALS"
+# Source the driver
+source "$(basename "$(pwd)").sh"
 
 CONFIG_DIR=$(get_folder "$0")
 
 # Patch makepkg to run as root (will be reverted later)
 function makepkg-patch() {
-  patch /usr/bin/makepkg < "$CONFIG_DIR/makepkg-patch.diff"
+  tell patch /usr/bin/makepkg < "$CONFIG_DIR/makepkg-patch.diff"
 } 
 
 # Temporary method to pull packages from AUR (to install yaourt)
@@ -24,14 +22,14 @@ function aurShim() {
 
   # Get package
   tmp="$(mktemp -d)"
-  cd "$tmp"
-  wget "https://aur.archlinux.org/cgit/aur.git/snapshot/$filename"
-  tar xf "$filename"
-  cd "$pkg"
+  tell cd "$tmp"
+  tell wget "https://aur.archlinux.org/cgit/aur.git/snapshot/$filename"
+  tell tar xf "$filename"
+  tell cd "$pkg"
 
   # Make contents and install
-  chmod -R 777 $tmp
-  makepkg --noconfirm -sri
+  tell chmod -R 777 $tmp
+  tell makepkg --noconfirm -sri
 
   cd "$cwd"
   rm -rf $tmp
@@ -45,32 +43,34 @@ function init() {
   echo "
 [multilib]
 Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-  pacman -Sy
+  tell pacman -Sy
 
   # Install standard packages
-  dir="$CONFIG_DIR/pacman"
+  dir="$PACKAGES/pacman"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
     section "Packages -- pacman / $(basename $file)"
-    pacman --noconfirm -S $(cat "$file")
+    tell pacman --noconfirm -S $(cat "$file")
   done
 
   # Install needed packages to use yaourt
+  section "Packages -- yaourt / Setup"
   makepkg-patch
   aurShim package-query
   aurShim yaourt
   
   # Installing community packages
   echo "Installing packages for yaourt..."
-  dir="$CONFIG_DIR/yaourt"
+  dir="$PACKAGES/yaourt"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
     section "Packages -- yaourt / $(basename $file)"
-    yaourt --noconfirm -S $(cat "$file")
+    tell yaourt --noconfirm -S $(cat "$file")
   done
 
   # Revert changes to makepkg
-  pacman --noconfirm -S pacman
+  section "Packages -- Cleanup"
+  tell pacman --noconfirm -S pacman
 }
 
 # Execute init (passing arguments) if we are not sourced

@@ -2,18 +2,15 @@
 # 10-boot
 # aoneill - 02/19/16
 
-PRE_DIR="$CWD/pre-setup"
-GLOBALS="$PRE_DIR/globals"
-
-source "$GLOBALS"
+# Source the driver
+source "$(basename "$(pwd)").sh"
 
 # Setup boot options
 function init() {
   section Boot
 
   # Clean up previous sections
-  echo "rm -rf /boot/*"
-  rm -rf /boot/*
+  tell rm -rf /boot/*
 
   dev=$(mount | grep "/boot" | sed -e "s|^/dev/\([a-z]\+\) .*|/dev/\1|")
   while [[ "$dev" == "" ]]; do
@@ -22,22 +19,20 @@ function init() {
     read dev
     
     if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
-      echo "mount $dev /boot"
-      mount $dev /boot
+      tell mount $dev /boot
     else
       dev=
     fi
   done 
 
-  pacman --noconfirm -S linux
-  bootctl --no-variables --path=/boot install
+  tell pacman --noconfirm -S linux
+  tell bootctl --no-variables --path=/boot install
   
   folder="$(get_folder "$0")"
   out="/boot/loader"
   ent="entries"
   
-  echo "cp $folder/loader.conf $out/loader.conf"
-  cp "$folder/loader.conf" "$out/loader.conf"
+  tell cp "$folder/loader.conf" "$out/loader.conf"
   
   for file in $(find "$folder/$ent/" -type f); do
     if [[ "$(grep -i linux $file)" != "" ]]; then
@@ -58,12 +53,10 @@ function init() {
       sed -e "s/PARTUUID/PARTUUID=$uuid/g" $file > $tmp
       
       file=$(basename $file)
-      echo "mv $tmp $out/$ent/$file"
-      mv $tmp "$out/$ent/$file"
+      tell mv $tmp "$out/$ent/$file"
     else
       file=$(basename $file)
-      echo "cp $folder/$ent/$file $out/$ent/$file"
-      cp "$folder/$ent/$file" "$out/$ent/$file"
+      tell cp "$folder/$ent/$file" "$out/$ent/$file"
     fi
   done
 }

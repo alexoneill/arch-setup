@@ -2,16 +2,50 @@
 # iso
 # aoneill - 03/09/15
 
+CWD="$(pwd)"
 BUILD_DIR=build
-ISO_URL="http://mirror.rackspace.com/archlinux/iso/latest/"
-ISO_FILE=arch.iso
-MOUNT=mnt
+DIST_DIR="airootfs/root/arch-setup"
+CUSTOMIZE_PATH="$CWD/common/customize.sh"
 
-mkdir -p $BUILD_DIR
-cd $BUILD_DIR
+function makeBuildDir() {
+  if [[ -d "$BUILD_DIR" ]]; then
+    rm -rf "$BUILD_DIR"
+  fi
+  mkdir -p $BUILD_DIR
+}
 
-version="$(curl "$ISO_URL" 2>/dev/null \
-           | grep ".iso\"" \
-           | sed -e "s/.*href=\"\(.*\)\".*/\1/g")"
+function installArchISO {
+  # Distribute Arch ISO materials
+  echo "cp -r /usr/share/archiso/configs/releng/* $BUILD_DIR/"
+  cp -r /usr/share/archiso/configs/releng/* "$BUILD_DIR/"
 
-[[ ! -f "$ISO_FILE" ]] && wget "${ISO_URL}${version}" -O "$ISO_FILE"
+  # Copy this repo into the filesystem
+  echo "mkdir -p $BUILD_DIR/$DIST_DIR"
+  mkdir -p "$BUILD_DIR/$DIST_DIR"
+
+  echo  "find . -maxdepth 1 -not -name $BUILD_DIR -not -path \"./.git*\" \\"
+  echo "  -not -name $(basename "$0") -not -path . \\"
+  echo "  | xargs cp -rt $BUILD_DIR/$DIST_DIR"
+  find . -maxdepth 1 -not -name $BUILD_DIR -not -path "*.git*" \
+    -not -name "$(basename "$0")" -not -path . \
+    | xargs cp -rt "$BUILD_DIR/$DIST_DIR"
+}
+
+function installCustomize() {
+  dist="$(echo "$DIST_DIR" | sed -e "s|^.*airootfs/root/||g")"
+  cat <(echo "DIST_DIR=$dist") "$CUSTOMIZE_PATH" >> \
+    "$BUILD_DIR/airootfs/root/customize_airootfs.sh"
+}
+
+function init() {
+  if ! [[ -d "/usr/share/archiso" ]]; then
+    echo "error: \`archiso' not installed! Will not continue"
+    return
+  fi
+
+  makeBuildDir
+  installArchISO
+  installCustomize
+}
+
+init

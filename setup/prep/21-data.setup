@@ -2,19 +2,19 @@
 # 21-data.setup
 # aoneill - 03/09/16
 
-PRE_DIR="$CWD/pre-setup"
-GLOBALS="$PRE_DIR/globals"
-
-source "$GLOBALS"
+# Source the driver
+source "$(basename "$(pwd)").sh"
 
 # Install all the packages needed
 function init() {
-  section Data
+  cwd="$(pwd)"
 
+  section Data
   echo "Downloading additional resources"
-  mkdir -p $DATA_DIR
-  cd $DATA_DIR
-  git clone --recursive git@github.com:/alexoneill/config.git
+
+  cd "$DATA"
+  tell git clone --recursive git@github.com:/alexoneill/config.git
+  cd "$cwd"
 }
 
 # Execute init (passing arguments) if we are not sourced

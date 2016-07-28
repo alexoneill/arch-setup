@@ -2,15 +2,12 @@
 # 20-accounts
 # aoneill - 03/09/16
 
-PRE_DIR="$CWD/pre-setup"
-GLOBALS="$PRE_DIR/globals"
-
-source "$GLOBALS"
-
-# Use utilities here
-source $PRE_DIR/*-passwords
+# Source the driver
+source "$(basename "$(pwd)").sh"
 
 function init() {
+  soucre_stage "prep" all
+
   section Accounts
 
   echo "Configuring root account"
@@ -18,7 +15,8 @@ function init() {
   pw_lookup rootuser | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
-  echo "$user:$password" | chpasswd
+  echo "$user:$password | chpasswd"
+  # echo "$user:$password" | chpasswd
 
   echo "Configuring user account"
   pw_lookup archlinux | tee $tmp >/dev/null
@@ -29,10 +27,11 @@ function init() {
   homedir=/home/$user 
   echo "$homedir" > $HOMEDIR_FILE
 
-  groupadd -f sudo
-  useradd -d $homedir -m -G sudo $user
-  rm -rf $homedir/*.*
-  echo "$user:$password" | chpasswd
+  tell groupadd -f sudo
+  tell useradd -d $homedir -m -G sudo $user
+  tell rm -rf $homedir/*.*
+  echo "$user:$password | chpasswd"
+  # echo "$user:$password" | chpasswd
   
   echo -n "Set your hostname, currently '$(hostname)' (nothing to ignore): "
   read hostname
@@ -47,12 +46,12 @@ function init() {
   password=$(cat $tmp | tail -n 1)
 
   # Generate RSA Key
-  mkdir -p $homedir/.ssh
-  ssh-keygen -t rsa -f $homedir/.ssh/id_rsa -N ''
+  tell mkdir -p $homedir/.ssh
+  tell ssh-keygen -t rsa -f $homedir/.ssh/id_rsa -N ''
 
   # Temporarily clone the ssh key for root use
-  mkdir -p ~/.ssh
-  cp -r $homedir/.ssh/id_rsa* ~/.ssh/
+  tell mkdir -p ~/.ssh
+  tell cp -r $homedir/.ssh/id_rsa* ~/.ssh/
 
   curl -u "$user:$password" "https://api.github.com" | grep "Bad credentials"
   while [[ "$?" == "0" ]]
@@ -63,7 +62,7 @@ function init() {
     password=$(cat $tmp | tail -n 1)
     curl -u "$user:$password" "https://api.github.com" | grep "Bad credentials"
   done
-  curl -u "$user:$password" \
+  tell curl -u "$user:$password" \
     --data "{\"title\": \"$(cat /etc/hostname)\", \
              \"key\": \"$(cat $homedir/.ssh/id_rsa.pub)\"}" \
     "https://api.github.com/user/keys"
