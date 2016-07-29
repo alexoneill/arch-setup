@@ -5,7 +5,7 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
-  for file in $(find "$DIR" -maxdepth 1 -type f -name "*-*" | sort); do
+  for file in $(find "$DIR" -maxdepth 1 -type f -name "*.setup" | sort); do
     [[ -x "$file" ]] && "$file"
   done
 }

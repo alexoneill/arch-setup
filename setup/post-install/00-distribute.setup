@@ -2,13 +2,14 @@
 # 00-distribute
 # aoneill - 04/05/16
 
+# Local directory the script is in
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Source the driver and another part
-source "$(basename "$(pwd)").sh"
-source_part "prep" all
-
 function init() {
+  # Source the driver and another part
+  source "$DIR/$(basename "$DIR").sh"
+  source_stage "prep" all
+
   section Distribute
 
   setup=$(acc_get_home)/.setup
