@@ -1,12 +1,16 @@
 #!/bin/bash
-# 20-accounts
-# aoneill - 03/09/16
+# 40-accounts.setup
+# aoneill - 07/28/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
-  soucre_stage "prep" all
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+  
+  # Source related files (just not ourselves)
+  source_stage "prep" "$0"
 
   section Accounts
 

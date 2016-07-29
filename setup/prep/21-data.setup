@@ -2,11 +2,14 @@
 # 21-data.setup
 # aoneill - 03/09/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Install all the packages needed
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
   cwd="$(pwd)"
 
   section Data

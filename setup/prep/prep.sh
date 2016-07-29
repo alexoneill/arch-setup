@@ -14,9 +14,18 @@ function sourced() {
   SETUP="$(cd "$DIR/../" && pwd)"
   source "$SETUP/common/util/util.sh"
   
-  if [[ "$1" == "all" ]]; then
-    for file in $(find "$DIR" -maxdepth 1 -type f -name "*-*" | sort); do
-      [[ -x "$file" ]] && echo source "$file"
+  passed="$1"
+  function gate() {
+    if [[ "$passed" == "all" ]]; then
+      cat -
+    else
+      cat - | grep -v "$passed\$"
+    fi
+  }
+
+  if [[ "$passed" != "" ]]; then
+    for file in $(find "$DIR" -maxdepth 1 -type f -name "*-*" | gate | sort); do
+      [[ -x "$file" ]] && source "$file"
     done
   fi
 }

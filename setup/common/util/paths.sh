@@ -7,9 +7,9 @@ _PATHS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 function sourced() {
   export BASE="$(cd "$_PATHS_DIR/../../../" && pwd)"
 
-  export COMMON="$(cd "$_PATHS_DIR/../../" && pwd)"
-  export PACKAGES="$COMMOM/packages"
-  export AIROOTFS="$COMMOM/airootfs"
+  export COMMON="$(cd "$_PATHS_DIR/../" && pwd)"
+  export PACKAGES="$COMMON/packages"
+  export AIROOTFS="$COMMON/airootfs"
 
   export DATA="$BASE/data"
 

@@ -1,11 +1,11 @@
 #!/bin/bash
-# 30-packages
-# aoneill - 02/19/16
+# 20-packages.setup
+# aoneill - 07/28/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-CONFIG_DIR=$(get_folder "$0")
+CONFIG_DIR="$DIR/$(pack_folder "$0")"
 
 # Patch makepkg to run as root (will be reverted later)
 function makepkg-patch() {
@@ -37,6 +37,9 @@ function aurShim() {
 
 # Install all the packages needed
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
   section Packages
 
   # Setup pacman for 32-bit libs 

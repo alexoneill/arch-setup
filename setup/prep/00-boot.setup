@@ -1,12 +1,15 @@
 #!/bin/bash
-# 10-boot
-# aoneill - 02/19/16
+# 00-boot.setup
+# aoneill - 07/28/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Setup boot options
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
   section Boot
 
   # Clean up previous sections
@@ -28,7 +31,7 @@ function init() {
   tell pacman --noconfirm -S linux
   tell bootctl --no-variables --path=/boot install
   
-  folder="$(get_folder "$0")"
+  folder="$DIR/$(pack_folder "$0")"
   out="/boot/loader"
   ent="entries"
   
