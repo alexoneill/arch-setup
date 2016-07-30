@@ -6,18 +6,20 @@ _UI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
   function tell() {
-    if [[ "$QUIET" != 1 ]]
-    then
+    if [[ "$QUIET" != "1" ]]; then
       echo $@
-      # "$@"
+    fi
+    if [[ "$DRY_RUN" != "1" ]]; then
+      "$@"
     fi
   }
 
   function tell_eval() {
-    if [[ "$QUIET" != 1 ]]
-    then
+    if [[ "$QUIET" != "1" ]]; then
       echo $@
-      # eval "$@"
+    fi
+    if [[ "$DRY_RUN" != "1" ]]; then
+      eval "$@"
     fi
   }
 

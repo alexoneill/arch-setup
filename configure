@@ -4,9 +4,25 @@
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Get various tools
-SETUP="$DIR/setup"
-source "$SETUP/setup.sh"
+function args() {
+  export QUIET=0
+  export DRY_RUN=0
+
+  while [[ ${1:0:1} == - ]]; do
+    term="$1"
+    case "$term" in
+      -q|--quiet)
+        export QUIET=1
+        ;;
+
+      -d|--dry-run)
+        export DRY_RUN=1
+        ;;
+    esac
+
+    shift 1
+  done
+}
 
 function blurb() {
   section "Alex O'Neill's Arch Customizer"  
@@ -18,23 +34,18 @@ for more information!\n"
 }
 
 function init() {
+  # Populate variables
+  args $@
+  shift $#
+
+  # Get various tools
+  SETUP="$DIR/setup"
+  source "$SETUP/setup.sh"
+  
   # Need root-level permissions (assuming no sudo)
-  if [[ "$(whoami)" != "root" ]]
-  then
+  if [[ "$(whoami)" != "root" ]]; then
     echo "Need root-level access. Run as root!"
     exit
-  fi
-
-  export QUIET=0
-  if [[ "$1" == "--quiet" ]]
-  then
-    export QUIET=1
-  fi
-
-  export DRY_RUN=0
-  if [[ "$1" == "--dry-run" ]]
-  then
-    export DRY_RUN=1
   fi
 
   # See if we are in a chroot (installing from a key)
