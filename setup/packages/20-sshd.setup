@@ -2,14 +2,16 @@
 # 20-sshd.setup
 # aoneill - 05/03/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
   section "SSH Daemon"
   
-  echo "systemctl enable sshd.service"
-  systemctl enable sshd.service
+  tell systemctl enable sshd.service
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

@@ -13,6 +13,14 @@ function sourced() {
     fi
   }
 
+  function tell_eval() {
+    if [[ "$QUIET" != 1 ]]
+    then
+      echo $@
+      # eval "$@"
+    fi
+  }
+
   function section() {
     in=$1
     cols=80

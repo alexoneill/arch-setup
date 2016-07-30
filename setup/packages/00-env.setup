@@ -2,14 +2,17 @@
 # 00-env.setup
 # aoneill - 03/09/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
-source_stage "prep" all
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+  source_stage "prep" all
+
   section Environment
 
-  folder=$(get_folder "$0")
+  folder="$DIR/$(pack_folder "$0")"
 
   env=$(acc_get_home)/.env
   config=$(acc_get_home)/.config
@@ -20,86 +23,37 @@ function init() {
     line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
     if [[ ! -d "$line" ]]
     then
-      mkdir -p $line
+      tell mkdir -p $line
     fi
   done
 
-  if [[ -d "$env/$git" ]]
-  then
-    oldPwd=$(pwd)
-    cd $env/$git
-    
-    git status | grep "nothing to commit" > /dev/null 2>&1;
-    if [[ "$?" == "0" ]]
-    then
-      echo "Detected changes to environment!"
-      echo "Showing diff..."
-      sleep 2
-      git diff
-      git commit
-      if [[ "$?" == "0" ]]
-      then
-        git pull
-        git push
-      fi
-    else
-      git pull
-    fi
-    
-    cd $oldPwd
-  else
-    echo "cp -r \"$RESOURCES/config\" \"$env/$git\""
-    cp -r "$RESOURCES/config" "$env/$git"
+  tell cp -r "$DATA/config" "$env/$git"
 
-    cwd=$(pwd)
-    cd "$env/$git"
-    if [[ -f "./.gitmodules" ]]; then
-      cat .gitmodules \
-        | grep "path" \
-        | sed -e "s/^\s*path\s*=\s*//g" \
-        | while IFS= read -r line; do
-        slashes=$(echo "$line" | tr "/" "\n" | wc -l)
+  cwd=$(pwd)
+  cd "$env/$git"
+  if [[ -f "./.gitmodules" ]]; then
+    cat .gitmodules \
+      | grep "path" \
+      | sed -e "s/^\s*path\s*=\s*//g" \
+      | while IFS= read -r line; do
+      slashes=$(echo "$line" | tr "/" "\n" | wc -l)
 
-        rel=".."
-        for i in $(seq 1 $((slashes - 1))); do
-          rel="$rel/.."
-        done;
-        
-        echo "echo \"gitdir: $rel/.git/modules/$line\" > \"$line/.git\""
-        echo "gitdir: $rel/.git/modules/$line" > "$line/.git"
+      rel=".."
+      for i in $(seq 1 $((slashes - 1))); do
+        rel="$rel/.."
       done;
-    fi
-    cd $cwd
+      
+      tell_eval "echo 'gitdir: $rel/.git/modules/$line' > '$line/.git'"
+    done;
   fi
+  cd "$cwd"
 
   cat "$folder/links" | while IFS= read -r line; do
     line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
     link=$(echo $line | awk '{ print $1; }')
     src=$(echo $line | awk '{ print $2; }')
 
-    # Handle various edge cases
-    if [[ ! -d "$(dirname $link)" ]]
-    then
-      echo "mkdir -p $(dirname $link)"
-      mkdir -p $(dirname $link)
-    fi
-
-    if [[ ! -h "$link" ]]
-    then
-      if [[ -e "$link" ]]
-      then
-        rm -rf "$link"
-      fi
-
-      echo "ln -s $src $link"
-      eval "ln -s $src $link"
-    elif [[ "$(readlink -f $link)" != "$(readlink -f $src)" ]]
-    then
-      rm "$link"
-      
-      echo "ln -s $src $link"
-      ln -s $src $link
-    fi
+    safe_ln "$src" "$link"
   done
 } 
 

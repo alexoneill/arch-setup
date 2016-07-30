@@ -11,33 +11,25 @@ function sourced() {
   }
 
   function safe_ln() {
-    if [[ "$#" != "2" ]]
-    then
+    if [[ "$#" != "2" ]]; then
       ln
       return
     fi
 
     # Handle various edge cases
-    mkdir_tell $(dirname $2)
+    if ! [[ -d "$(dirname $2)" ]]; then
+      tell mkdir -p $(dirname $2)
+    fi
 
-    readlink -f $1
-    readlink -f $2
-
-    if [[ ! -h "$2" ]]
-    then
-      if [[ -e "$2" ]]
-      then
-        rm -rf "$2"
+    if [[ ! -h "$2" ]]; then
+      if [[ -e "$2" ]]; then
+        tell rm -rf "$2"
       fi
 
-      tell "ln -s $1 $2"
-      ln -s $1 $2
-    elif [[ "$(readlink -f $2)" != "$(readlink -f $1)" ]]
-    then
-      rm "$2"
-      
-      tell "ln -s $1 $2"
-      ln -s $1 $2
+      tell ln -s $1 $2
+    elif [[ "$(readlink -f $2)" != "$(readlink -f $1)" ]]; then
+      tell rm "$2"
+      tell ln -s $1 $2
     fi
   }
 }

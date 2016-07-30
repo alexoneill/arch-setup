@@ -2,32 +2,34 @@
 # 10-dropbox.setup
 # aoneill - 01/15/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
-source_stage "prep" all
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+  source_stage "prep" all
+
   section "Dropbox (filesystem stubs)"
 
-  folder="$(get_folder "$0")"
+  folder="$DIR/$(pack_folder "$0")"
   
   # Get user
   tmp=$(mktemp)
   pw_lookup archlinux | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
 
-  if [[ "$(systemctl is-enabled dropbox@$user.service)" != "enabled" ]]
-  then
-    cat "$folder/unit" | EDITOR=tee systemctl edit dropbox@$user.service 
+  if [[ "$(systemctl is-enabled dropbox@$user.service)" != "enabled" ]]; then
+    tell_eval \
+      "cat '$folder/unit' | EDITOR=tee systemctl edit dropbox@$user.service"
 
-    systemctl enable dropbox@$user.service
-    systemctl start dropbox@$user.service
+    tell systemctl enable dropbox@$user.service
+    tell systemctl start dropbox@$user.service
   fi
 
   if [[ ! -d "$(acc_get_home)/.data" ]]
   then
-    echo "mkdir -p $(acc_get_home)/.data"
-    mkdir -p $(acc_get_home)/.data
+    tell mkdir -p $(acc_get_home)/.data
   fi
 
   cat "$folder/links" | while IFS= read -r line; do
@@ -35,33 +37,11 @@ function init() {
     link=$(echo $line | awk '{ print $1; }')
     src=$(echo $line | awk '{ print $2; }')
 
-    # Handle various edge cases
-    if [[ ! -d "$(dirname $link)" ]]
-    then
-      echo "mkdir -p $(dirname $link)"
-      mkdir -p $(dirname $link)
-    fi
-
-    if [[ ! -h "$link" ]]
-    then
-      if [[ -e "$link" ]]
-      then
-        rm -rf "$link"
-      fi
-
-      echo "ln -s $src $link"
-      eval "ln -s $src $link"
-    elif [[ "$(readlink -f $link)" != "$(readlink -f $src)" ]]
-    then
-      rm "$link"
-      
-      echo "ln -s $src $link"
-      ln -s $src $link
-    fi
+    safe_ln "$src" "$link"
   done
 
   # Update databases
-  fc-cache
+  tell fc-cache
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

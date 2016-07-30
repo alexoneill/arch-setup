@@ -2,17 +2,17 @@
 # 20-ntp.setup
 # aoneill - 04/21/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
   section "Time and Date"
   
-  echo "systemctl enable ntpd.service"
-  systemctl enable ntpd.service
-  
-  echo "timedatectl set-timezone UTC"
-  timedatectl set-timezone UTC
+  tell systemctl enable ntpd.service
+  tell timedatectl set-timezone UTC
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

@@ -2,15 +2,18 @@
 # 20-python.setup
 # aoneill - 04/05/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
   section python
   
   python=/usr/bin/python
-  rm $python
-  ln -s ${python}2.7 $python
+  tell rm $python
+  tell ln -s ${python}2.7 $python
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

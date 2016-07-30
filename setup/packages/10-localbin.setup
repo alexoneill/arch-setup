@@ -2,17 +2,19 @@
 # 10-localbin.setup
 # aoneill - 01/15/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
   section Localbin
 
-  folder=$(get_folder "$0")
+  folder="$DIR/$(pack_folder "$0")"
   localbin=/usr/local/bin/
 
-  echo "cp -r $(pwd)/$folder/* $localbin"
-  cp -r $(pwd)/$folder/* $localbin
+  tell cp -r $folder/* $localbin
 }
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

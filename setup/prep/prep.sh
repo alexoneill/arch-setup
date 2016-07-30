@@ -2,6 +2,10 @@
 # prep.sh
 # aoneill - 07/26/16
 
+if [[ "$DIR" != "" ]]; then
+  _OTHER_DIR="$DIR"
+fi
+
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
@@ -24,10 +28,13 @@ function sourced() {
   }
 
   if [[ "$passed" != "" ]]; then
-    for file in $(find "$DIR" -maxdepth 1 -type f -name "*-*" | gate | sort); do
+    for file in $(find "$DIR" -maxdepth 1 -type f -name "*.setup" \
+                    | gate | sort); do
       [[ -x "$file" ]] && source "$file"
     done
   fi
+
+  export DIR="$_OTHER_DIR"
 }
 
 # Run init only when run

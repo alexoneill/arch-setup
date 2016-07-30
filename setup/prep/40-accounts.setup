@@ -19,8 +19,7 @@ function init() {
   pw_lookup rootuser | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
-  echo "$user:$password | chpasswd"
-  # echo "$user:$password" | chpasswd
+  tell_eval "echo '$user:$password' | chpasswd"
 
   echo "Configuring user account"
   pw_lookup archlinux | tee $tmp >/dev/null
@@ -35,7 +34,7 @@ function init() {
   tell useradd -d $homedir -m -G sudo $user
   tell rm -rf $homedir/*.*
   echo "$user:$password | chpasswd"
-  # echo "$user:$password" | chpasswd
+  tell_eval "echo '$user:$password' | chpasswd"
   
   echo -n "Set your hostname, currently '$(hostname)' (nothing to ignore): "
   read hostname

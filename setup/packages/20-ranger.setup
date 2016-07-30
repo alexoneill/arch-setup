@@ -2,25 +2,25 @@
 # 20-ranger.setup
 # aoneill - 01/15/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
-source_stage "prep" all
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+  source_stage "prep" all
+
   section ranger
   
-  folder="$(get_folder "$0")"
+  folder="$DIR/$(pack_folder "$0")"
 
   tmp=$(mktemp)
   ranger=/usr/bin/ranger
 
-  echo "tail -n +2 $ranger | cat <(echo \"#!/usr/bin/python3 -O\") - \
-> \"$ranger\""
-  tail -n +2 $ranger | cat <(echo "#!/usr/bin/python3 -O") - > "$tmp"
-  mv "$tmp" "$ranger"
-
-  echo "chmod 755 $ranger"
-  chmod 755 $ranger
+  tell_eval \
+    "tail -n +2 '$ranger' | cat <(echo '#!/usr/bin/python3 -O') - > '$tmp'"
+  tell mv "$tmp" "$ranger"
+  tell chmod 755 $ranger
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

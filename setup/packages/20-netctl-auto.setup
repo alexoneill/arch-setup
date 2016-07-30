@@ -2,33 +2,37 @@
 # 10-netctl-auto.setup
 # aoneill - 01/15/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
-source_stage "prep" all
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+  source_stage "prep" all
+
   section netctl-auto
   
-  folder="$(get_folder "$0")"
+  folder="$DIR/$(pack_folder "$0")"
 
   ifaces="$(mktemp)"
-  if [[ "$(find /etc/netctl -maxdepth 1 -type f | wc -l)" == "0" ]]
-  then
-    ip link | grep "^[0-9]:" | sed -e "s/^.*: \(.*\): .*/\1/g" > $ifaces
-    device="$(grep wlp $ifaces | head -n 1)"
+  if [[ "$(find /etc/netctl -maxdepth 1 -type f | wc -l)" == "0" ]]; then
+    ip link | grep "^[0-9]:" \
+            | sed -e "s/^.*: \(.*\): .*/\1/g" \
+            | sort | uniq > $ifaces
   else
     find /etc/netctl -maxdepth 1 -type f \
       | xargs cat \
       | grep "^Interface=" \
-      | sed -e "s/Interface=//g" > $ifaces
+      | sed -e "s/Interface=//g" \
+      | sort | uniq > $ifaces
   fi
 
-  if [[ "$(wc -l $ifaces)" == "0" ]]
-  then
+  device="$(grep wlp $ifaces | head -n 1)"
+
+  if [[ "$(wc -l $ifaces | sed -e "s/ .*$//")" == "0" ]]; then
     echo "Uh oh! There are no wireless interfaces. Skipping..."
     return
-  elif [[ "$(wc -l $ifaces)" != "1" ]]
-  then
+  elif [[ "$(wc -l $ifaces | sed -e "s/ .*$//")" != "1" ]]; then
     echo "Known interfaces: $(echo "$(cat $ifaces)")"
     echo "Assuming '$device' for wireless functionality"
     echo -n "Give alternate device (nothing means '$device' is okay): "
@@ -39,8 +43,7 @@ function init() {
       read alt_dev
     done
 
-    if [[ "$alt_dev" != "" ]]
-    then
+    if [[ "$alt_dev" != "" ]]; then
       device="$alt_dev"
     fi
   else
@@ -50,20 +53,19 @@ function init() {
   # Setup for further lookup
   echo "$device" > $WIFI_IFACE_FILE
 
-  if [[ "$(systemctl is-enabled netctl-auto@$device.service)" != "enabled" ]]
-  then
+  if [[ "$(systemctl is-enabled netctl-auto@$device.service)" \
+          != "enabled" ]]; then
     echo "Using '$device' for wireless functionality"
-    systemctl enable netctl-auto@$device.service
-    systemctl start netctl-auto@$device.service
+    tell systemctl enable netctl-auto@$device.service
+    tell systemctl start netctl-auto@$device.service
   fi
 
   # Ignore profiles we already have credentials for
   for file in $(find "$folder/" -type f -not -name "cmu-secure"\
-                                        -not -name "eduroam")
-  do
+                                        -not -name "eduroam"); do
       if [[ ! -f "/etc/netctl/$(basename $file)" 
-        || "$(grep "Interface=$device" /etc/netctl/$(basename $file))" == "" ]]
-    then
+        || "$(grep "Interface=$device" \
+                  /etc/netctl/$(basename $file))" == "" ]]; then
       tmp=$(mktemp)
       cat "$file" | sed -e "s/\$INTERFACE/$device/g" | tee $tmp >/dev/null
        
@@ -74,11 +76,12 @@ function init() {
         read pass
         
         otherTmp=$(mktemp)
-        cat $tmp | sed -e "s/\$PASSWORD/$pass/g" | tee $otherTmp >/dev/null
-        cp $otherTmp $tmp
+        tell_eval \
+          "cat $tmp | sed -e 's/\$PASSWORD/$pass/g' | tee $otherTmp >/dev/null"
+        tell cp $otherTmp $tmp
       fi
 
-      cp $tmp "/etc/netctl/$(basename $file)"
+      tell cp $tmp "/etc/netctl/$(basename $file)"
     fi
   done
     
@@ -90,18 +93,18 @@ function init() {
 
   echo "Configuring cmu-secure"
   file=cmu-secure
-  cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g" \
-    | sed -e "s/\$USER/$user/g" \
-    | sed -e "s/\$PASSWORD/$password/g" > "/etc/netctl/$file"
+  tell_eval "cat '$folder/$file' | sed -e 's/\$INTERFACE/$device/g' " \
+    "| sed -e 's/\$USER/$user/g' " \
+    "| sed -e 's/\$PASSWORD/$password/g' > '/etc/netctl/$file'"
 
   echo "Configuring eduroam"
   file=eduroam
-  cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g" \
-    | sed -e "s/\$USER/$user/g" \
-    | sed -e "s/\$PASSWORD/$password/g" > "/etc/netctl/$file"
+  tell_eval "cat '$folder/$file' | sed -e 's/\$INTERFACE/$device/g' " \
+    "| sed -e 's/\$USER/$user/g' " \
+    "| sed -e 's/\$PASSWORD/$password/g' > '/etc/netctl/$file'"
 
   # Fix completion issues
-  ln -s /usr/share/bash-completion/completions/{netctl,netctl-auto}
+  tell ln -s /usr/share/bash-completion/completions/{netctl,netctl-auto}
 } 
 
 function net_get_iface() {

@@ -2,41 +2,27 @@
 # 20-termite.setup
 # aoneill - 01/15/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
-source_stage "prep" all
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+  source_stage "prep" all
+
   section termite
   
-  folder="$(get_folder "$0")"
+  folder="$DIR/$(pack_folder "$0")"
 
-  if [[ ! -d "$(acc_get_home)/.config/termite" ]]
-  then
-    echo "mkdir -p $(acc_get_home)/.config/termite"
-    mkdir -p $(acc_get_home)/.config/termite
+  if [[ ! -d "$(acc_get_home)/.config/termite" ]]; then
+    tell mkdir -p $(acc_get_home)/.config/termite
   fi
 
   cd $(acc_get_home)/.config/termite
   src=config-operator
   link=config
 
-  if [[ ! -h "$link" ]]
-  then
-    if [[ -e "$link" ]]
-    then
-      rm -rf "$link"
-    fi
-
-    echo "ln -s $src $link"
-    ln -s $src $link
-  elif [[ "$(readlink -f $link)" != "$(readlink -f $src)" ]]
-  then
-    rm "$link"
-    
-    echo "ln -s $src $link"
-    ln -s $src $link
-  fi
+  safe_ln "$src" "$link"
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

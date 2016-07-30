@@ -2,19 +2,20 @@
 # 20-cups.setup
 # aoneill - 01/15/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
-source_stage "prep" all
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
   section CUPS
 
-  folder="$(get_folder "$0")"
+  folder="$DIR/$(pack_folder "$0")"
 
-  if [[ "$(systemctl is-enabled org.cups.cupsd.service)" != "enabled" ]]
-  then
-    systemctl enable org.cups.cupsd.service
-    systemctl start org.cups.cupsd.service
+  if [[ "$(systemctl is-enabled org.cups.cupsd.service)" != "enabled" ]]; then
+    tell systemctl enable org.cups.cupsd.service
+    tell systemctl start org.cups.cupsd.service
   fi
 
   cat "$folder/printers" | while IFS= read -r line; do
@@ -24,12 +25,12 @@ function init() {
 
     echo "Configuring $printer..."
 
-    lpadmin -p "$printer" -E -v "$lpd" -P "$folder/ppd/$file"
-    lpoptions -p "$printer" -o printer-is-shared=false \
-                            -o sides=two-sided-long-edge
+    tell lpadmin -p "$printer" -E -v "$lpd" -P "$folder/ppd/$file"
+    tell lpoptions -p "$printer" -o printer-is-shared=false \
+                                 -o sides=two-sided-long-edge
 
-    cupsaccept "$printer"
-    cupsenable "$printer"
+    tell cupsaccept "$printer"
+    tell cupsenable "$printer"
   done
 } 
 

@@ -2,22 +2,24 @@
 # 02-permissions.setup
 # aoneill - 03/09/16
 
-# Source the driver
-source "$(basename "$(pwd)").sh"
-source_stage "prep" all
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+  source_stage "prep" all
+
   section Permissions
 
-  folder=$(get_folder "$0")
+  folder="$DIR/$(pack_folder "$0")"
   
   # Get credentials
   tmp=$(mktemp)
   pw_lookup archlinux | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
 
-  echo "chown -R $user:$user $(acc_get_home)"
-  chown -R $user:$user $(acc_get_home)
+  tell chown -R $user:$user $(acc_get_home)
 } 
 
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
