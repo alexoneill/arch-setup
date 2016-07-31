@@ -10,13 +10,13 @@ function sourced() {
       echo $@
     fi
     if [[ "$DRY_RUN" != "1" ]]; then
-      "$@"
+      $@
     fi
   }
 
   function tell_eval() {
     if [[ "$QUIET" != "1" ]]; then
-      echo $@
+      echo "$@"
     fi
     if [[ "$DRY_RUN" != "1" ]]; then
       eval "$@"

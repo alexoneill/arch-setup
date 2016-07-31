@@ -2,50 +2,135 @@
 # iso
 # aoneill - 03/09/15
 
-CWD="$(pwd)"
-BUILD_DIR=build
-DIST_DIR="airootfs/root/arch-setup"
-CUSTOMIZE_PATH="$CWD/common/customize.sh"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SETUP="$DIR/setup"
 
-function makeBuildDir() {
-  if [[ -d "$BUILD_DIR" ]]; then
-    rm -rf "$BUILD_DIR"
-  fi
-  mkdir -p $BUILD_DIR
+BUILD_DIR="$DIR/build"
+DIST_DIR="airootfs/root/arch-setup"
+
+function args() {
+  export QUIET=0
+  export DRY_RUN=0
+
+  while [[ ${1:0:1} == - ]]; do
+    term="$1"
+    case "$term" in
+      -q|--quiet)
+        export QUIET=1
+        ;;
+
+      -d|--dry-run)
+        export DRY_RUN=1
+        ;;
+    esac
+
+    shift 1
+  done
 }
 
-function installArchISO {
+function setup() {
+  section setup
+
+  if [[ -d "$BUILD_DIR" ]]; then
+    tell rm -rf "$BUILD_DIR"
+  fi
+  tell mkdir -p $BUILD_DIR
+}
+
+function archiso {
+  section archiso
+
   # Distribute Arch ISO materials
-  echo "cp -r /usr/share/archiso/configs/releng/* $BUILD_DIR/"
-  cp -r /usr/share/archiso/configs/releng/* "$BUILD_DIR/"
+  tell cp -r /usr/share/archiso/configs/releng/* "$BUILD_DIR/"
 
   # Copy this repo into the filesystem
-  echo "mkdir -p $BUILD_DIR/$DIST_DIR"
-  mkdir -p "$BUILD_DIR/$DIST_DIR"
+  tell mkdir -p "$BUILD_DIR/$DIST_DIR"
 
-  echo  "find . -maxdepth 1 -not -name $BUILD_DIR -not -path \"./.git*\" \\"
-  echo "  -not -name $(basename "$0") -not -path . \\"
-  echo "  | xargs cp -rt $BUILD_DIR/$DIST_DIR"
-  find . -maxdepth 1 -not -name $BUILD_DIR -not -path "*.git*" \
-    -not -name "$(basename "$0")" -not -path . \
-    | xargs cp -rt "$BUILD_DIR/$DIST_DIR"
+  tell_eval "find . -maxdepth 1 -not -name '$(basename "$BUILD_DIR")' " \
+    "-not -path '*.git*' " \
+    "-not -name '$(basename "$0")' " \
+    "-not -path . " \
+    "| xargs cp -rt '$BUILD_DIR/$DIST_DIR'"
 }
 
-function installCustomize() {
+function airootfs() {
+  section airootfs
+
   dist="$(echo "$DIST_DIR" | sed -e "s|^.*airootfs/root/||g")"
-  cat <(echo "DIST_DIR=$dist") "$CUSTOMIZE_PATH" >> \
-    "$BUILD_DIR/airootfs/root/customize_airootfs.sh"
+  tell_eval "cat <(echo 'DIST_DIR=$dist') '$CUSTOMIZE_PATH' >> " \
+    "'$BUILD_DIR/airootfs/root/customize_airootfs.sh'"
+}
+
+function packages() {
+  section packages
+
+  cache="$BUILD_DIR/airootfs/root/pack_cache"
+  tell mkdir -p "$BUILD_DIR"
+
+  needSudo="$(test "$(whoami)" == "root"; echo "$?")"
+  if [[ "$needSudo" == "1" ]]; then
+    echo "Requesting root access..."
+    tell sudo -v
+  fi
+
+  # Cache official packages
+  echo "Caching packages for pacman..."
+  dir="$PACKAGES/pacman"
+  for file in $(find $dir -maxdepth 1 -type f | sort)
+  do
+    if [[ "$needSudo" == "1" ]]; then
+      tell sudo pacman --noconfirm -Syw --cachedir "$cache" $(cat "$file")
+    else
+      tell pacman --noconfirm -Syw --cachedir "$cache" $(cat "$file")
+    fi
+  done
+
+  # Cache community packages
+  echo "Caching packages for yaourt..."
+  dir="$PACKAGES/yaourt"
+  for file in $(find $dir -maxdepth 1 -type f | sort)
+  do
+    if [[ "$needSudo" == "1" ]]; then
+      tell sudo yaourt --noconfirm -Syw --cachedir "$cache" $(cat "$file")
+    else
+      tell yaourt --noconfirm -Syw --cachedir "$cache" $(cat "$file")
+    fi
+  done
 }
 
 function init() {
+  # Populate variables
+  args $@
+  shift $#
+
+  # Get various tools
+  source "$SETUP/setup.sh"
+  CUSTOMIZE_PATH="$AIROOTFS/customize.sh"
+
   if ! [[ -d "/usr/share/archiso" ]]; then
     echo "error: \`archiso' not installed! Will not continue"
     return
   fi
 
-  makeBuildDir
-  installArchISO
-  installCustomize
+  which pacman yaourt 2>&1 >/dev/null
+  if [[ "$?" == "1" ]]; then
+    echo "error: \`pacman' or \`yaourt' not installed! Will not continue"
+    return
+  fi
+
+  which sudo 2>&1 >/dev/null
+  if [[ "$?" != "0" && "$(whoami)" != "root" ]]; then
+    echo "error: No access to root-privileges! Will not continue"
+    return
+  fi
+
+  setup
+
+  archiso
+  airootfs
+  packages
 }
 
-init
+# Run init only when run
+EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@
