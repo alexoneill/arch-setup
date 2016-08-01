@@ -75,13 +75,15 @@ function packages() {
 
   # Cache official packages
   echo "Caching packages for pacman..."
+  tell pacman --noconfirm -Sy
+
   dir="$PACKAGES/pacman"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
     if [[ "$needSudo" == "1" ]]; then
-      tell sudo pacman --noconfirm -Syw --cachedir "$cache" $(cat "$file")
+      tell sudo pacman --noconfirm -Sw --cachedir "$cache" $(cat "$file")
     else
-      tell pacman --noconfirm -Syw --cachedir "$cache" $(cat "$file")
+      tell pacman --noconfirm -Sw --cachedir "$cache" $(cat "$file")
     fi
   done
 
