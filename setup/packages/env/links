@@ -1,3 +1,4 @@
+~/.profile ~/.env/git/bash/.profile
 ~/.bashrc ~/.env/git/bash/.bashrc
 ~/.bashrc.d ~/.env/git/bash/.bashrc.d
 ~/.bin-git ~/.env/git/bash/.bin
