@@ -64,7 +64,7 @@ function airootfs() {
 function packages() {
   section packages
 
-  cache="$BUILD_DIR/airootfs/root/pack_cache"
+  cache="$BUILD_DIR/airootfs/root/pacman_cache"
   tell mkdir -p "$BUILD_DIR"
 
   needSudo="$(test "$(whoami)" == "root"; echo "$?")"
