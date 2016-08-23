@@ -24,7 +24,7 @@ function sourced() {
   }
     
   # Global for keeping track of which sections have been shown
-  [[ -z "$_UI_SECTION_TITLES" ]] && _UI_SECTION_TITLES="$(mktemp)"
+  [[ -z "$_UI_SECTION_TITLES" ]] && _UI_SECTION_TITLES="$(temp)"
 
   function section() {
     in="$@"

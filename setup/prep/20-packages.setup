@@ -40,7 +40,7 @@ function aurShim() {
   echo "Installing $pkg from AUR..."
 
   # Get package
-  tmp="$(mktemp -d)"
+  tmp="$(temp -d)"
   tell cd "$tmp"
   tell wget "https://aur.archlinux.org/cgit/aur.git/snapshot/$filename"
   tell tar xf "$filename"
@@ -61,14 +61,14 @@ function installAllWithManager() {
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
     # Filter packages that already exist
-    tmp="$(mktemp)"
+    tmp="$(temp)"
     pacman -Qi $(cat "$file") 2>&1 >/dev/null \
       | grep "error: package .* was not found" \
       | sed -e "s/^error: package '\([a-zA-Z0-9_-]\+\)' was not found$/\1/" \
       > "$tmp"
 
     # Check for groups if stuff was missed
-    final="$(mktemp)"
+    final="$(temp)"
     if [[ "$(cat "$tmp")" ]]; then
       # See if the missed packages were actually groups
       pacman -Qg $(cat "$tmp") 2>&1 >/dev/null \

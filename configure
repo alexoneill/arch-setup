@@ -18,7 +18,6 @@ Options:
 EOF
 }
 
-
 function args() {
   export QUIET=0
   export DRY_RUN=0
@@ -50,6 +49,17 @@ function args() {
   done
 }
 
+# Function run at the end
+function trapped() {
+  echo -e "\n"
+
+  # Lock the password file
+  pw_lock
+
+  # Remove temporary files
+  tell_always rm -rf "$TEMP_PREFIX.*"
+}
+
 function blurb() {
   section "Alex O'Neill's Arch Customizer"  
 
@@ -78,6 +88,19 @@ function init() {
     fi
 
     echo "Need root-level access. Run as root!"
+    return 1
+  fi
+
+  # Trap cleanup commands at the end
+  trap trapped EXIT
+
+  # Unlock the password file
+  source "$SETUP/setup.sh" "$SETUP_PREP" "all"
+  if ! pw_unlock; then
+    echo "error: Failed to unlock password file!"
+
+    # Undo the trap
+    trap - EXIT
     return 1
   fi
 

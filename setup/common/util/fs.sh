@@ -9,6 +9,11 @@ function sourced() {
     list=($@)
     echo "${list[@]}"
   }
+
+  TEMP_PREFIX="/tmp/arch-setup.tmp"
+  function temp() {
+    temp "$TEMP_PREFIX.XXXX" $@
+  }
   
   function will_ln() {
     [[ "$#" != "2" ]] && return 0

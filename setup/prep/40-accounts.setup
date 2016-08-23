@@ -28,7 +28,7 @@ function update() {
 
 function configureRoot() {
   echo "Configuring root account"
-  tmp=$(mktemp)
+  tmp=$(temp)
   pw_lookup rootuser | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)

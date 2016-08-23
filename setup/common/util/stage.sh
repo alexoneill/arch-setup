@@ -16,6 +16,7 @@ function sourced() {
     driver="$1"
     shift 1
 
+    echo source "$SETUP/$driver/$driver.sh" $@
     source "$SETUP/$driver/$driver.sh" $@
   }
 } 

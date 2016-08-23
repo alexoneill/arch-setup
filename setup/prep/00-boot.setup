@@ -55,7 +55,7 @@ function installEntries() {
       done
       
       uuid=$(blkid -s PARTUUID -o value $dev)    
-      tmp=$(mktemp)
+      tmp=$(temp)
       sed -e "s/PARTUUID/PARTUUID=$uuid/g" $file > $tmp
       
       file=$(basename $file)
@@ -71,15 +71,15 @@ function installEntries() {
 function update() {
   init
 
-  all=$(mktemp)
+  all=$(temp)
   find "$folder/$ent/" -type f | sort > "$all"
 
-  installed=$(mktemp)
+  installed=$(temp)
   find "$out/$ent/" -type f | sed -e "s|^$out/$ent/|$folder/$ent/|" \
                             | sort > "$installed" 
 
   # Get files that are missing in /boot/...
-  final=$(mktemp)
+  final=$(temp)
   grep -vf "$installed" "$all" > "$final"
 
   cat $final
@@ -116,7 +116,7 @@ function install() {
   tell pacman --noconfirm -S linux
   tell bootctl --no-variables --path=/boot install
   
-  entries="$(mktemp)"
+  entries="$(temp)"
   find "$folder/$ent/" -type f > "$entries"
   installEntries "$entries"
   rm -rf "$entries"

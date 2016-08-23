@@ -20,7 +20,7 @@ function init() {
 }
 
 function patchRanger() {
-  tmp=$(mktemp)
+  tmp=$(temp)
 
   tell_eval \
     "tail -n +2 '$ranger' | cat <(echo '#!/usr/bin/python3 -O') - > '$tmp'"

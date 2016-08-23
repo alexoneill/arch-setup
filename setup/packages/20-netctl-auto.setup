@@ -24,7 +24,7 @@ function installProfiles() {
   [[ -z "$(cat "$input")" ]] && return
   section "$SECTION"
   
-  ifaces="$(mktemp)"
+  ifaces="$(temp)"
   if [[ "$(find /etc/netctl -maxdepth 1 -type f | wc -l)" == "0" ]]; then
     ip link | grep "^[0-9]:" \
             | sed -e "s/^.*: \(.*\): .*/\1/g" \
@@ -71,7 +71,7 @@ function installProfiles() {
       if [[ ! -f "/etc/netctl/$(basename $file)" 
         || "$(grep "Interface=$device" \
                   /etc/netctl/$(basename $file))" == "" ]]; then
-      tmp=$(mktemp)
+      tmp=$(temp)
       cat "$file" | sed -e "s/\$INTERFACE/$device/g" \
         > $tmp
        
@@ -80,7 +80,7 @@ function installProfiles() {
         echo -n "Network password: "
         read pass
         
-        otherTmp=$(mktemp)
+        otherTmp=$(temp)
         cat $tmp | sed -e 's/\$PASSWORD/$pass/g' \
           > $otherTmp
 
@@ -95,13 +95,13 @@ function installProfiles() {
 
 function specialProfiles() {
   # Handle CMU Secure + Eduroam case (given password earlier)
-  tmp=$(mktemp)
+  tmp=$(temp)
   pw_lookup andrew | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
 
   function _installer() {
-    _tmp="$(mktemp)"
+    _tmp="$(temp)"
 
     cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g" \
       | sed -e "s/\$USER/$user/g" \
@@ -127,19 +127,19 @@ function specialProfiles() {
 function update() {
   init
 
-  all="$(mktemp)"
+  all="$(temp)"
   find "$folder/" -type f -not -name "cmu-secure" \
                           -not -name "eduroam" \
     | sort > "$all"
 
-  installed="$(mktemp)"
+  installed="$(temp)"
   find "$out" -maxdepth 1 -type f -not -name "cmu-secure" \
                                   -not -name "eduroam" \
     | sed -e "s|^$out/|$folder/|" \
     | sort > "$installed"
 
   # Get files that are missing in /etc/...
-  final=$(mktemp)
+  final=$(temp)
   grep -vf "$installed" "$all" > "$final"
 
   # Handle install for all missing profiles
@@ -164,7 +164,7 @@ function install() {
   init
   section "$SECTION"
 
-  all="$(mktemp)"
+  all="$(temp)"
   find "$folder/" -type f -not -name "cmu-secure" \
                           -not -name "eduroam" \
     | sort > "$all"

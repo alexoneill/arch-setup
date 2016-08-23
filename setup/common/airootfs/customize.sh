@@ -25,7 +25,7 @@ function init() {
       return 1
     fi
 
-    tmp=$(mktemp)
+    tmp=$(temp)
     parted $dev print \
       | tail -n+8 \
       | sed -e "/^\w*$/d" \
