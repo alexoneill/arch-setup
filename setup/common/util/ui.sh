@@ -23,8 +23,17 @@ function sourced() {
     fi
   }
 
+  # Global for keeping track of which sections have been shown
+  ! [[ $_UI_SECTION_TITLES ]] && _UI_SECTION_TITLES=()
+
   function section() {
-    in=$1
+    in="$@"
+
+    # Skip if the section has already been shown
+    [[ -n "$(printf '%s\n' "${_UI_SECTION_TITLES[@]}" | grep "$in")" ]] &&
+      return
+    _UI_SECTION_TITLES+=("$in")
+
     cols=80
     textStart=$((($cols - ${#in}) / 2 - 1))
     head=$(printf "%-${cols}s" "#")
@@ -36,6 +45,24 @@ function sourced() {
       echo -n $in
       printf "%*s\n" $(($cols - $textStart - ${#in} - 1)) "#"
       echo "${head// /\#}"
+    fi
+  }
+
+  function minor_section() {
+    in="$@"
+
+    cols=80
+    textStart=$((($cols - ${#in}) / 2))
+    head=$(printf "%-${cols}s" " ")
+
+    if [[ "$QUIET" != 1 ]]
+    then
+      # Start with a new line
+      echo
+
+      printf "%*s" $textStart " "
+      echo $in
+      echo "${head// /=}"
     fi
   }
 
