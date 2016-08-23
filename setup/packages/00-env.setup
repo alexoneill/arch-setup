@@ -59,7 +59,6 @@ function steps() {
 # Update steps
 function update() {
   init
-
   steps
 
   # Update the environment (if there is an internet connection)
@@ -67,6 +66,9 @@ function update() {
     section "$SECTION"
     su $user env-update
   fi
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Preform install steps

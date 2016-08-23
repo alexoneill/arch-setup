@@ -14,16 +14,20 @@ function init() {
   # Source the driver and another part
   source "$DIR/$(basename "$DIR").sh"
   source_stage "prep" all
-
-  section "$SECTION"
 }
 
 # Do nothing on an update
-function update() { :; }
+function update() {
+  init
+
+  # Notify if nothing happened
+  skipped "$SECTION"
+}
 
 # Install the data
 function install() {
   init
+  section "$SECTION"
 
   setup=$(acc_get_home)/.setup
   url=$(git remote show origin | grep Fetch | sed -e "s/.*URL: //g")

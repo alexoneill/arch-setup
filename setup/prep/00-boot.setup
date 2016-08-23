@@ -85,6 +85,9 @@ function update() {
   cat $final
   installEntries "$final"
   rm -rf "$all" "$installed" "$final"
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Setup boot options

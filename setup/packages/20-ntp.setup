@@ -43,6 +43,9 @@ function update() {
   
   section "$SECTION"
   tell timedatectl set-timezone "$newTz"
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Preform install steps

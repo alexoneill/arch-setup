@@ -35,6 +35,9 @@ function update() {
 
   section "$SECTION"
   patchRanger
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Install steps

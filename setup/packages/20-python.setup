@@ -29,6 +29,9 @@ function update() {
   # Make Python 2.7 the default
   tell rm $python
   safe_ln ${python}2.7 $python
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Install steps

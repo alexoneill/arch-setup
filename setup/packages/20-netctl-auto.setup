@@ -154,6 +154,9 @@ function update() {
   will_ln "$completions/netctl" "$completions/netctl-auto" &&
     section "$SECTION"
   safe_ln "$completions/netctl" "$completions/netctl-auto"
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Install steps

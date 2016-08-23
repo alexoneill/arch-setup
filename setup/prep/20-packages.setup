@@ -99,6 +99,9 @@ function update() {
 
   # Install yaourt packages
   installAllWithManager yaourt
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Install all the packages needed

@@ -36,6 +36,9 @@ function update() {
   # Sync the config, restart the service on an update
   copyConfig
   tell systemctl restart slim.service
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Install steps

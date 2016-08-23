@@ -35,7 +35,13 @@ function envSetup() {
 }
 
 # General update steps
-function update() { init; envSetup; }
+function update() {
+  init
+  envSetup
+
+  # Notify if nothing happened
+  skipped "$SECTION"
+}
 
 # General install steps
 function install() {

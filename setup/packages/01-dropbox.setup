@@ -65,7 +65,13 @@ function steps() {
 }
 
 # Update steps
-function update() { init; steps; }
+function update() {
+  init
+  steps
+
+  # Notify if nothing happened
+  skipped "$SECTION"
+}
 
 # Install steps
 function install() {

@@ -15,7 +15,12 @@ function init() {
 }
 
 # Do nothing on an update
-function update() { :; }
+function update() {
+  init
+
+  # Notify if nothing happened
+  skipped "$SECTION"
+}
 
 # Install steps
 function install() {

@@ -16,12 +16,15 @@ function init() {
   
   # Source related files (just not ourselves)
   source_stage "prep" "$0"
-
-  section "$SECTION"
 }
 
 # Do nothing when updating
-function update() { :; }
+function update() {
+  init
+
+  # Notify if nothing happened
+  skipped "$SECTION"
+}
 
 function configureRoot() {
   echo "Configuring root account"
@@ -90,6 +93,7 @@ function configureGithub() {
 # Install steps
 function install() {
   init
+  section "$SECTION"
 
   # Configure options
   configureRoot

@@ -14,18 +14,22 @@ function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
   
-  section "$SECTION"
-
   cwd="$(pwd)"
   repo="git@github.com:/alexoneill/config.git"
 }
 
 # This section does not need to do any updating
-function update() { :; }
+function update() {
+  init
+
+  # Notify if nothing happened
+  skipped "$SECTION"
+}
 
 # Install the needed configuration for future installation
 function install() {
   init
+  section "$SECTION"
 
   echo "Downloading additional resources"
 

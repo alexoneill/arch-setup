@@ -31,6 +31,9 @@ function update() {
   section "$SECTION"
 
   copySudoConf
+
+  # Notify if nothing happened
+  skipped "$SECTION"
 }
 
 # Install steps
