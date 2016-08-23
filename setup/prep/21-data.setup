@@ -5,21 +5,33 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Install all the packages needed
+# Section name
+SECTION="$(basename "$DIR") :: $(basename "$0")"
+
+# General initialization steps
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
+  
+  section "$SECTION"
 
   cwd="$(pwd)"
-
-  section Data
-  echo "Downloading additional resources"
-
-  cd "$DATA"
-  tell git clone --recursive git@github.com:/alexoneill/config.git
-  cd "$cwd"
+  repo="git@github.com:/alexoneill/config.git"
 }
 
-# Execute init (passing arguments) if we are not sourced
+# This section does not need to do any updating
+function update() {}
+
+# Install the needed configuration for future installation
+function install() {
+  init
+
+  echo "Downloading additional resources"
+
+  ! [[ -d "$DATA/$(basename "$repo")" ]] &&
+    tell git clone --recursive -C "$DATA" $repo
+}
+
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

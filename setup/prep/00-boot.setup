@@ -5,40 +5,42 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Setup boot options
+# Section name
+SECTION="$(basename "$DIR") :: $(basename "$0")"
+
+# Install the configuration if it doesn't exist or is different from our copy
+function installConf() {
+  [[ -f "$out/loader.conf" ]] && 
+    [[ -z "$(diff "$folder/loader.conf" "$out/loader.conf")" ]] &&
+      return
+
+  section "$SECTION"
+  tell cp "$folder/loader.conf" "$out/loader.conf"
+}
+
+# General initialization
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
-
-  section Boot
-
-  # Clean up previous sections
-  tell rm -rf /boot/*
-
-  dev=$(mount | grep "/boot" | sed -e "s|^/dev/\([a-z]\+\) .*|/dev/\1|")
-  while [[ "$dev" == "" ]]; do
-    echo -n "Boot device ($(ls /dev/sd[a-z][0-9] \
-                             | tr "\n" " ")): "
-    read dev
-    
-    if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
-      tell mount $dev /boot
-    else
-      dev=
-    fi
-  done 
-
-  tell pacman --noconfirm -S linux
-  tell bootctl --no-variables --path=/boot install
-  
+ 
   folder="$DIR/$(pack_folder "$0")"
   out="/boot/loader"
   ent="entries"
   
-  tell cp "$folder/loader.conf" "$out/loader.conf"
-  
-  for file in $(find "$folder/$ent/" -type f); do
-    if [[ "$(grep -i linux $file)" != "" ]]; then
+  installConf
+}
+
+
+# Install boot entries (one per line of passed file)
+function installEntries() {
+  entries="$1"
+
+  for file in $(cat "$entries"); do
+    # Display a section if we need to
+    section "$SECTION"
+
+    # See if we need to populate a PARTUUID
+    if [[ -n "$(grep -i linux $file)" ]]; then
       os=$(grep "^title\s" $file | sed -e "s/^title\s\+//")
     
       while true; do
@@ -64,6 +66,57 @@ function init() {
   done
 }
 
-# Execute init (passing arguments) if we are not sourced
+# Preform an update rather than an install
+function update() {
+  init
+
+  all=$(mktemp)
+  find "$folder/$ent/" -type f | sort > "$all"
+
+  installed=$(mktemp)
+  find "$out/$ent/" -type f | sed -e "s|^$out/$ent/|$folder/$ent/" \
+                            | sort > "$installed" 
+
+  # Get files that are missing in /boot/...
+  final=$(mktemp)
+  grep -vf "$installed" "$all" > "$final"
+
+  installEntries "$final"
+  rm -rf "$all" "$installed" "$final"
+}
+
+# Setup boot options
+function install() {
+  init
+  
+  section "$SECTION"
+
+  # Clean up previous sections
+  tell rm -rf /boot/*
+
+  dev=$(mount | grep "/boot" | sed -e "s|^/dev/\([a-z]\+\) .*|/dev/\1|")
+  while [[ "$dev" == "" ]]; do
+    echo -n "Boot device ($(ls /dev/sd[a-z][0-9] \
+                             | tr "\n" " ")): "
+    read dev
+    
+    if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
+      tell mount $dev /boot
+    else
+      dev=
+    fi
+  done 
+
+  # Re-populate /boot with proper images
+  tell pacman --noconfirm -S linux
+  tell bootctl --no-variables --path=/boot install
+  
+  entries="$(mktemp)"
+  find "$folder/$ent/" -type f > "$entries"
+  installEntries "$entries"
+  rm -rf "$entries"
+}
+
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

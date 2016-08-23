@@ -2,11 +2,16 @@
 # prep.sh
 # aoneill - 07/26/16
 
+# Don't overwrite a previously set DIR
 if [[ "$DIR" != "" ]]; then
   _OTHER_DIR="$DIR"
 fi
 
+# Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Section name
+SECTION="$(basename "$DIR") :: $(basename "$0")"
 
 function init() {
   for file in $(find "$DIR" -maxdepth 1 -type f -name "*.setup" | sort); do

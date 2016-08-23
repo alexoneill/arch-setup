@@ -5,6 +5,10 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+SECTION="$(basename "$DIR") :: $(basename "$0")"
+
+# General initialization
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
@@ -12,15 +16,22 @@ function init() {
   # Source related files (just not ourselves)
   source_stage "prep" "$0"
 
-  section Accounts
+  section "$SECTION"
+}
 
+# Do nothing when updating
+function update() {}
+
+function configureRoot() {
   echo "Configuring root account"
   tmp=$(mktemp)
   pw_lookup rootuser | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
   tell_eval "echo '$user:$password' | chpasswd"
+}
 
+function configureUser() {
   echo "Configuring user account"
   pw_lookup archlinux | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
@@ -35,14 +46,18 @@ function init() {
   tell rm -rf $homedir/*.*
   echo "$user:$password | chpasswd"
   tell_eval "echo '$user:$password' | chpasswd"
-  
+}
+
+function configureHostname() {
   echo -n "Set your hostname, currently '$(hostname)' (nothing to ignore): "
   read hostname
   if [[ "$hostname" != "" ]]
   then
     echo $hostname > /etc/hostname
   fi
+}
 
+function configureGithub() {
   echo "Configuring Github account"
   pw_lookup github | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
@@ -69,12 +84,23 @@ function init() {
     --data "{\"title\": \"$(cat /etc/hostname)\", \
              \"key\": \"$(cat $homedir/.ssh/id_rsa.pub)\"}" \
     "https://api.github.com/user/keys"
+}
+
+# Install steps
+function install() {
+  init
+
+  # Configure options
+  configureRoot
+  configureUser
+  configureHostname
+  configureGithub
 } 
 
 function acc_get_home() {
   cat $HOMEDIR_FILE
 }
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
-
+[[ "$EXEC" == "1" ]] && $MODE $@

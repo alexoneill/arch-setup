@@ -5,11 +5,31 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+SECTION="$(basename "$DIR") :: $(basename "$0")"
+
 CONFIG_DIR="$DIR/$(pack_folder "$0")"
 
+# General initialization
+function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+
+  section "$SECTION"
+}
+
+# Enable multilib for pacman
+function pacmanMultilib() {
+  [[ -z "$(grep -A 1 "^[multilib]" | grep "^Include=")" ]] &&
+    cat << EOF >> /etc/pacman.conf
+[multilib]
+Include = /etc/pacman.d/mirrorlist"
+EOF
+}
+
 # Patch makepkg to run as root (will be reverted later)
-function makepkg-patch() {
-  tell patch /usr/bin/makepkg < "$CONFIG_DIR/makepkg-patch.diff"
+function makepkgPatch() {
+  tell patch /usr/bin/makepkg < "$CONFIG_DIR/makepkgPatch.diff"
 } 
 
 # Temporary method to pull packages from AUR (to install yaourt)
@@ -35,47 +55,61 @@ function aurShim() {
   rm -rf $tmp
 }
 
-# Install all the packages needed
-function init() {
-  # Source the driver
-  source "$DIR/$(basename "$DIR").sh"
+function installAllWithManager() {
+  manager="$1"
 
-  section Packages
-
-  # Setup pacman for 32-bit libs 
-  echo "
-[multilib]
-Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-  tell pacman -Sy
-
-  # Install standard packages
-  dir="$PACKAGES/pacman"
+  dir="$PACKAGES/$manager"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
-    section "Packages -- pacman / $(basename $file)"
-    tell pacman --noconfirm -S $(cat "$file")
+    # Filter packages that already exist
+    tmp="$(mktemp)"
+    pacman -Qi $(cat "$file") \
+      | grep "error: package .* was not found" \
+      | sed -e "s/^error: package \'\([a-zA-Z0-9_-]\)\' was not found$/\1/" \
+      > "$tmp"
+
+    # Install necessary
+    if [[ "$(wc -l "$tmp" | sed -e "s/^[0-9]\+ .*$/\1/")" -gt 0 ]]; then
+      section "Packages -- $manager / $(basename $file)"
+      tell $manager --noconfirm -S $(cat "$tmp")
+    fi
   done
+}
+
+# Preform an update
+function update() {
+  init
+
+  # Install standard packages
+  installAllWithManager pacman
+
+  # Install yaourt packages
+  installAllWithManager yaourt
+}
+
+# Install all the packages needed
+function install() {
+  init
+
+  pacmanMultilib
+
+  # Install standard packages
+  installAllWithManager pacman
 
   # Install needed packages to use yaourt
   section "Packages -- yaourt / Setup"
-  makepkg-patch
+  makepkgPatch
   aurShim package-query
   aurShim yaourt
-  
-  # Installing community packages
-  echo "Installing packages for yaourt..."
-  dir="$PACKAGES/yaourt"
-  for file in $(find $dir -maxdepth 1 -type f | sort)
-  do
-    section "Packages -- yaourt / $(basename $file)"
-    tell yaourt --noconfirm -S $(cat "$file")
-  done
 
+  # Install yaourt packages
+  installAllWithManager yaourt
+  
   # Revert changes to makepkg
   section "Packages -- Cleanup"
   tell pacman --noconfirm -S pacman
 }
 
-# Execute init (passing arguments) if we are not sourced
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@
