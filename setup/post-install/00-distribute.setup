@@ -1,5 +1,5 @@
 #!/bin/bash
-# 00-distribute
+# 00-distribute.setup
 # aoneill - 04/05/16
 
 # Local directory the script is in

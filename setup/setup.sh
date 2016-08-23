@@ -2,19 +2,10 @@
 # setup.sh
 # aoneill - 07/27/16
 
-tmp=$(mktemp)
-env | sort > $tmp
-
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 SETUP="$DIR"
 source "$SETUP/common/util/util.sh"
-
-function run() {
-  driver="$1"
-  shift 1
-  "$DIR/$driver/$driver.sh" $@
-}
 
 function init() {
   # Make sure data exists
@@ -22,9 +13,12 @@ function init() {
 
   # Run the requested package
   [[ "$#" -gt "0" ]] && run_stage $@
+}
 
-  diff <(env | sort) $tmp
-  rm $tmp
+function run() {
+  driver="$1"
+  shift 1
+  "$DIR/$driver/$driver.sh" $@
 }
 
 function sourced() {
