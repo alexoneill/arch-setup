@@ -45,7 +45,7 @@ function sourced() {
   export SECTION="$_OTHER_SECTION"
 }
 
-# Run init only when run
+# Run `init' only when exec'd, run `sourced' only when sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
 [[ "$EXEC" == "1" ]] && init $@
 [[ "$EXEC" == "0" ]] && sourced $@

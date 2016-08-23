@@ -1,6 +1,6 @@
 #!/bin/bash
-# post-install.sh
-# aoneill - 07/27/16
+# driver.sh
+# aoneill - 08/23/16
 
 # Don't overwrite a previously set DIR
 if [[ "$DIR" != "" ]]; then
