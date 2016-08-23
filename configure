@@ -4,10 +4,27 @@
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+function usage() {
+  cat << EOF
+usage: $0 [OPTION]
+
+Alex O'Neill's Arch Customizer
+
+Options:
+  -q, --quiet    Run without any status messages or explanation.
+  -d, --dry-run  Only display proposed changes, do not change anything.
+  -u, --update   Run in an "update-only" mode, where it is assumed that
+                 previously an install was preformed.
+EOF
+}
+
+
 function args() {
   export QUIET=0
   export DRY_RUN=0
+  export MODE="install"
 
+  local _args="$@"
   while [[ ${1:0:1} == - ]]; do
     term="$1"
     case "$term" in
@@ -18,6 +35,13 @@ function args() {
       -d|--dry-run)
         export DRY_RUN=1
         ;;
+
+      -u|--update)
+        export MODE="update"
+      
+      *)
+        usage 
+        return 1
     esac
 
     shift 1
@@ -35,7 +59,7 @@ for more information!\n"
 
 function init() {
   # Populate variables
-  args $@
+  args $@ || return
   shift $#
 
   # Get various tools
