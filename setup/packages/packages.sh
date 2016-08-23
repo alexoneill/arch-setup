@@ -23,7 +23,7 @@ function init() {
 
 function sourced() {
   SETUP="$(cd "$DIR/../" && pwd)"
-  source "$SETUP/common/util/util.sh"
+  source "$SETUP/common/util/util.sh" "all"
   
   passed="$1"
   function gate() {

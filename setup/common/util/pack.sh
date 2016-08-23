@@ -2,7 +2,8 @@
 # pack.sh
 # aoneill - 07/27/16
 
-_PACK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Local directory the script is in
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
   function pack_folder() {

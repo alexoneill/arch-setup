@@ -2,7 +2,8 @@
 # stage.sh
 # aoneill - 07/27/16
 
-_STAGE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Local directory the script is in
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
   function run_stage() {

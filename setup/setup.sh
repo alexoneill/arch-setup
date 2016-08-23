@@ -4,10 +4,10 @@
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-SETUP="$DIR"
-source "$SETUP/common/util/util.sh"
-
 function init() {
+  SETUP="$DIR"
+  source "$SETUP/common/util/util.sh"
+
   # Make sure data exists
   ! [[ -d "$DATA" ]] && mkdir -p "$DATA"
 
@@ -15,13 +15,10 @@ function init() {
   [[ "$#" -gt "0" ]] && run_stage $@
 }
 
-function run() {
-  driver="$1"
-  shift 1
-  "$DIR/$driver/$driver.sh" $@
-}
-
 function sourced() {
+  SETUP="$DIR"
+  source "$SETUP/common/util/util.sh" "all"
+
   export SETUP_PREP="prep"
   export SETUP_PACK="packages"
   export SETUP_POST="post-install"

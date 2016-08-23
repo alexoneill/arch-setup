@@ -2,15 +2,36 @@
 # util.sh
 # aoneill - 07/26/16
 
-_UTIL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Don't overwrite a previously set DIR
+if [[ "$DIR" != "" ]]; then
+  _OTHER_DIR="$DIR"
+fi
+
+# Location of this script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
+  passed="$1"
+  function gate() {
+    if [[ "$passed" == "all" ]]; then
+      cat -
+    else
+      cat - | grep -v "$passed\$"
+    fi
+  }
+
   # Source the support
-  for file in $(find "$_UTIL_DIR" -type f -not -name "util.sh"); do
-    [[ -x "$file" ]] && source "$file"
-  done
+  if [[ "$passed" != "" ]]; then
+    for file in $(find "$DIR" -maxdepth 1 -type f -not -name "util.sh" \
+                    | gate | sort); do
+      [[ -x "$file" ]] && source "$file"
+    done
+  fi
+
+  export DIR="$_OTHER_DIR"
 }
 
-# Designed for sourcing
+# Run `init' only when exec'd, run `sourced' only when sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
+[[ "$EXEC" == "1" ]] && init $@
 [[ "$EXEC" == "0" ]] && sourced $@

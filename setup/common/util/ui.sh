@@ -2,9 +2,13 @@
 # ui.sh
 # aoneill - 07/27/16
 
-_UI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Local directory the script is in
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh" "$(basename "${BASH_SOURCE[0]}")"
+
   function show() {
     ! (( QUIET )) && echo "$@"
   }

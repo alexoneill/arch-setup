@@ -2,12 +2,13 @@
 # paths.sh
 # aoneill - 07/26/16
 
-_PATHS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Local directory the script is in
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
-  export BASE="$(cd "$_PATHS_DIR/../../../" && pwd)"
+  export BASE="$(cd "$DIR/../../../" && pwd)"
 
-  export COMMON="$(cd "$_PATHS_DIR/../" && pwd)"
+  export COMMON="$(cd "$DIR/../" && pwd)"
   export PACKAGES="$COMMON/packages"
   export AIROOTFS="$COMMON/airootfs"
 

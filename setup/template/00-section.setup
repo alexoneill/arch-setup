@@ -11,7 +11,7 @@ SECTION="$(basename "$DIR") :: $_NAME"
 
 # General initialization steps
 function init() {
-  # Source the driver and another part
+  # Source the driver
   source "$DIR/$(basename "$DIR").sh"
 }
 

@@ -2,7 +2,8 @@
 # fs.sh
 # aoneill - 07/27/16
 
-_FS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Local directory the script is in
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
   function expand_glob() {
@@ -12,7 +13,7 @@ function sourced() {
 
   TEMP_PREFIX="/tmp/arch-setup.tmp"
   function temp() {
-    temp "$TEMP_PREFIX.XXXX" $@
+    mktemp "$TEMP_PREFIX.XXXX" $@
   }
   
   function will_ln() {
