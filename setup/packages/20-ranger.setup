@@ -30,6 +30,7 @@ function patchRanger() {
 
 # Patch ranger if it needs it on update
 function update() { 
+  init
   [[ -n "$(head -n 1 $ranger | grep "/usr/bin/python3 -O")" ]] && return
 
   section "$SECTION"

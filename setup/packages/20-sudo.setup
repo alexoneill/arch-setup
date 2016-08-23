@@ -13,7 +13,6 @@ SECTION="$(basename "$DIR") :: $_NAME"
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
-  section "$SECTION"
   
   folder="$DIR/$(pack_folder "$0")"
   sudoersd="/etc/sudoers.d/"

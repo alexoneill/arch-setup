@@ -13,7 +13,11 @@ SECTION="$(basename "$DIR") :: $_NAME"
 function createFolders() {
   cat "$folder/folders" | while IFS= read -r line; do
     line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
-    [[ ! -d "$line" ]] && tell mkdir -p $line
+    [[ -d "$line" ]] && continue
+    section "$SECTION"
+
+    tell mkdir -p "$line"
+    tell chown $user:$user "$line"
   done
 }
 
@@ -24,7 +28,11 @@ function createSymlinks() {
     link=$(echo $line | awk '{ print $1; }')
     src=$(echo $line | awk '{ print $2; }')
 
+    linked="$(will_ln "$src" "$link"; echo "$?")"
+    ! (( linked )) && section "$SECTION"
+
     safe_ln "$src" "$link"
+    ! (( linked )) && tell chown $user:$user "$link"
   done
 }
 
@@ -35,12 +43,15 @@ function init() {
   source_stage "prep" all
 
   folder="$DIR/$(pack_folder "$0")"
+  user="$(pw_lookup archlinux | head -n 1)"
 
   env=$(acc_get_home)/.env
   config=$(acc_get_home)/.config
   git=git
   db=dropbox
+}
 
+function steps() {
   createFolders
   createSymlinks
 }
@@ -49,8 +60,10 @@ function init() {
 function update() {
   init
 
+  steps
+
   # Update the environment (if there is an internet connection)
-  if internet then;
+  if internet; then
     section "$SECTION"
     env-update
   fi
@@ -61,7 +74,10 @@ function install() {
   init
   section "$SECTION"
 
+  steps
+
   tell cp -r "$DATA/config" "$env/$git"
+  tell chown $user:$user -R "$env/$git"
 
   cwd="$(pwd)"
   cd "$env/$git"
@@ -78,6 +94,7 @@ function install() {
       done;
       
       tell_eval "echo 'gitdir: $rel/.git/modules/$line' > '$line/.git'"
+      tell chown $user:$user "$line/.git"
     done;
   fi
   cd "$cwd"

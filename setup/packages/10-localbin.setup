@@ -17,6 +17,7 @@ function init() {
   folder="$DIR/$(pack_folder "$0")"
   localbin="/usr/local/bin/"
 }
+
 function installProgs() {
   # Check if we need to update anything
   if [[ -z "$(diff -r "$folder" "$localbin")" ]]; then

@@ -17,6 +17,7 @@ function createFolders() {
   if ! [[ -d "$(acc_get_home)/.data" ]]; then
     section "$SECTION"
     tell mkdir -p $(acc_get_home)/.data
+    tell chown $user:$user -R "$(acc_get_home)/.data"
   fi
 
   cat "$folder/links" | while IFS= read -r line; do
@@ -25,21 +26,17 @@ function createFolders() {
     src=$(echo $line | awk '{ print $2; }')
     cmd=$(echo $line | awk '{ $1=$2=""; print $0; }')
 
-    linked="$(will_safe_ln "$src" "$link"; echo "$?")"
-    (( linked )) && section "$SECTION"
+    linked="$(will_ln "$src" "$link"; echo "$?")"
+    ! (( linked )) && section "$SECTION"
 
     safe_ln "$src" "$link"
-    (( linked )) && [[ "$cmd" ]] && tell_eval "$cmd"
+    ! (( linked )) && tell chown $user:$user -R "$link"
+    ! (( linked )) && [[ "$cmd" ]] && tell_eval "$cmd"
   done
 }
 
 # Enable the Dropbox daemon
 function enableDropbox() {
-  # Get user
-  tmp=$(mktemp)
-  pw_lookup archlinux | tee $tmp >/dev/null
-  user=$(cat $tmp | head -n 1)
-
   override="/etc/systemd/system/dropbox@$user.service.d/override.conf"
   [[ "$(systemctl is-enabled dropbox@$user.service)" == "enabled" ]] && return
   [[ -f "$override" && -z "$(diff "$folder/unit" "$override")" ]] && return
@@ -59,6 +56,7 @@ function init() {
   source_stage "prep" all
 
   folder="$DIR/$(pack_folder "$0")"
+  user="$(pw_lookup archlinux | head -n 1)"
 }
 
 function steps() {

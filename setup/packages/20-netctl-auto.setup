@@ -103,15 +103,16 @@ function specialProfiles() {
   function _installer() {
     _tmp="$(mktemp)"
 
-    cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g"
-      | sed -e "s/\$USER/$user/g"
-      | sed -e "s/\$PASSWORD/$password/g" > "$_tmp"
+    cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g" \
+      | sed -e "s/\$USER/$user/g" \
+      | sed -e "s/\$PASSWORD/$password/g" \
+      > "$_tmp"
 
     [[ -f "/etc/netctl/$file" ]] && 
       [[ -z "$(diff "$_tmp" "/etc/netctl/$file")" ]] && return
 
     section "$SECTION"
-    echo "Installing \`$folder/$file\'"
+    echo "Installing \`$folder/$file'"
     tell mv "$_tmp" "/etc/netctl/$file"
   }
 

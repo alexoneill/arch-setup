@@ -28,12 +28,14 @@ function envSetup() {
   src=config-operator
   link=config
 
-  will_ln "$src" "$link" && section "$SECTION"
+  linked="$(will_ln "$src" "$link"; echo "$?")"
+  ! (( linked )) && section "$SECTION"
   safe_ln "$src" "$link"
+  ! (( linked )) && tell chown $user:$user "$link"
 }
 
 # General update steps
-function update() { init; envSetup }
+function update() { init; envSetup; }
 
 # General install steps
 function install() {

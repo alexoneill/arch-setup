@@ -23,7 +23,7 @@ function update() {
   init
 
   # Only continue if Python is not the right version
-  [[ "$(readlink -f "$python")" ~= python${vers} ]] && return
+  [[ "$(readlink -f "$python")" =~ "python${vers}" ]] && return
   section "$SECTION"
 
   # Make Python 2.7 the default
