@@ -2,10 +2,17 @@
 # post-install.sh
 # aoneill - 07/27/16
 
+# Don't overwrite a previously set DIR
 if [[ "$DIR" != "" ]]; then
   _OTHER_DIR="$DIR"
 fi
 
+# Don't overwrite a previously set SECTION
+if [[ "$DIR" != "" ]]; then
+  _OTHER_SECTION="$SECTION"
+fi
+
+# Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
@@ -35,6 +42,7 @@ function sourced() {
   fi
 
   export DIR="$_OTHER_DIR"
+  export SECTION="$_OTHER_SECTION"
 }
 
 # Run init only when run

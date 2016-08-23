@@ -5,12 +5,25 @@
 # Local directory the script is in
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
+
+# General initialization steps
 function init() {
   # Source the driver and another part
   source "$DIR/$(basename "$DIR").sh"
   source_stage "prep" all
 
-  section Distribute
+  section "$SECTION"
+}
+
+# Do nothing on an update
+function update() { :; }
+
+# Install the data
+function install() {
+  init
 
   setup=$(acc_get_home)/.setup
   url=$(git remote show origin | grep Fetch | sed -e "s/.*URL: //g")
@@ -22,5 +35,6 @@ function init() {
   tell cp -r "$DATA" "$setup/$(basename "$DATA")"
 } 
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@
