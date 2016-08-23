@@ -22,17 +22,17 @@ function sourced() {
       eval "$@"
     fi
   }
-
+    
   # Global for keeping track of which sections have been shown
-  ! [[ $_UI_SECTION_TITLES ]] && _UI_SECTION_TITLES=()
+  [[ -z "$_UI_SECTION_TITLES" ]] && _UI_SECTION_TITLES="$(mktemp)"
 
   function section() {
     in="$@"
 
     # Skip if the section has already been shown
-    [[ -n "$(printf '%s\n' "${_UI_SECTION_TITLES[@]}" | grep "$in")" ]] &&
+    [[ -n "$(grep "$in" "$_UI_SECTION_TITLES")" ]] &&
       return
-    _UI_SECTION_TITLES+=("$in")
+    echo "$in" >> "$_UI_SECTION_TITLES"
 
     cols=80
     textStart=$((($cols - ${#in}) / 2 - 1))

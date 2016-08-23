@@ -8,12 +8,14 @@ function sourced() {
   function run_stage() {
     driver="$1"
     shift 1
+
     "$SETUP/$driver/$driver.sh" $@
   }
 
   function source_stage() {
     driver="$1"
     shift 1
+
     source "$SETUP/$driver/$driver.sh" $@
   }
 } 

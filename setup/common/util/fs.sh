@@ -10,19 +10,20 @@ function sourced() {
     echo "${list[@]}"
   }
   
-  function will_safe_ln() {
+  function will_ln() {
     [[ "$#" != "2" ]] && return 0
 
-    # If we have to create the destination directory, then we will ln
-    ! [[ -d "$(dirname $2)" ]] && return 1
+    # We ln if...
+    # ...we have to create the destination directory
+    ! [[ -d "$(dirname $2)" ]] && return 0
 
-    # If the destination is not a link
-    [[ ! -h "$2" ]] && return 1
+    # ...the destination is not a link
+    [[ ! -h "$2" ]] && return 0
 
-    # If the destination is the wrong link
-    [[ "$(readlink -f $2)" != "$(readlink -f $1)" ]] && return 1
+    # ...the destination is the wrong link
+    [[ "$(readlink -f $2)" != "$(readlink -f $1)" ]] && return 0
 
-    return 0
+    return 1
   }
 
   function safe_ln() {
