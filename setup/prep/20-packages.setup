@@ -6,16 +6,15 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Section name
-SECTION="$(basename "$DIR") :: $(basename "$0")"
-
-CONFIG_DIR="$DIR/$(pack_folder "$0")"
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
 
 # General initialization
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
 
-  section "$SECTION"
+  CONFIG_DIR="$DIR/$(pack_folder "$0")"
 }
 
 # Enable multilib for pacman
@@ -63,15 +62,30 @@ function installAllWithManager() {
   do
     # Filter packages that already exist
     tmp="$(mktemp)"
-    pacman -Qi $(cat "$file") \
+    pacman -Qi $(cat "$file") 2>&1 >/dev/null \
       | grep "error: package .* was not found" \
-      | sed -e "s/^error: package \'\([a-zA-Z0-9_-]\)\' was not found$/\1/" \
+      | sed -e "s/^error: package '\([a-zA-Z0-9_-]\+\)' was not found$/\1/" \
       > "$tmp"
 
+    # Check for groups if stuff was missed
+    final="$(mktemp)"
+    if [[ "$(cat "$tmp")" ]]; then
+      # See if the missed packages were actually groups
+      pacman -Qg $(cat "$tmp") 2>&1 >/dev/null \
+        | grep "error: group .* was not found" \
+        | sed -e "s/^error: group '\([a-zA-Z0-9_-]\+\)' was not found$/\1/" \
+        > "$final"
+    else
+      mv "$tmp" "$final"
+    fi
+
     # Install necessary
-    if [[ "$(wc -l "$tmp" | sed -e "s/^[0-9]\+ .*$/\1/")" -gt 0 ]]; then
-      section "Packages -- $manager / $(basename $file)"
-      tell $manager --noconfirm -S $(cat "$tmp")
+    if [[ "$(wc -l "$final" | sed -e "s/^\([0-9]\+\) .*$/\1/")" -gt 0 ]]; then
+      # Display the major section if needed
+      section "$SECTION"
+
+      minor_section "Packages -- $manager / $(basename $file)"
+      tell $manager --noconfirm -S $(cat "$final")
     fi
   done
 }
@@ -97,7 +111,7 @@ function install() {
   installAllWithManager pacman
 
   # Install needed packages to use yaourt
-  section "Packages -- yaourt / Setup"
+  minor_section "Packages -- yaourt / Setup"
   makepkgPatch
   aurShim package-query
   aurShim yaourt
@@ -106,7 +120,7 @@ function install() {
   installAllWithManager yaourt
   
   # Revert changes to makepkg
-  section "Packages -- Cleanup"
+  minor_section "Packages -- Cleanup"
   tell pacman --noconfirm -S pacman
 }
 

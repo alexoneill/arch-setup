@@ -6,7 +6,8 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Section name
-SECTION="$(basename "$DIR") :: $(basename "$0")"
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
 
 # Install the configuration if it doesn't exist or is different from our copy
 function installConf() {
@@ -74,13 +75,14 @@ function update() {
   find "$folder/$ent/" -type f | sort > "$all"
 
   installed=$(mktemp)
-  find "$out/$ent/" -type f | sed -e "s|^$out/$ent/|$folder/$ent/" \
+  find "$out/$ent/" -type f | sed -e "s|^$out/$ent/|$folder/$ent/|" \
                             | sort > "$installed" 
 
   # Get files that are missing in /boot/...
   final=$(mktemp)
   grep -vf "$installed" "$all" > "$final"
 
+  cat $final
   installEntries "$final"
   rm -rf "$all" "$installed" "$final"
 }

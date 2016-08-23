@@ -6,7 +6,8 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Section name
-SECTION="$(basename "$DIR") :: $(basename "$0")"
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
 
 # General initialization
 function init() {
@@ -20,7 +21,7 @@ function init() {
 }
 
 # Do nothing when updating
-function update() {}
+function update() { :; }
 
 function configureRoot() {
   echo "Configuring root account"
