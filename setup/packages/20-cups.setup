@@ -5,34 +5,62 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-function init() {
-  # Source the driver
-  source "$DIR/$(basename "$DIR").sh"
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
 
-  section CUPS
-
-  folder="$DIR/$(pack_folder "$0")"
-
+function enableCups() {
   if [[ "$(systemctl is-enabled org.cups.cupsd.service)" != "enabled" ]]; then
     tell systemctl enable org.cups.cupsd.service
     tell systemctl start org.cups.cupsd.service
   fi
+}
+
+function configurePrinters() {
+  folder="$DIR/$(pack_folder "$0")"
 
   cat "$folder/printers" | while IFS= read -r line; do
     printer=$(echo $line | awk '{ print $1; }')
     lpd=$(echo $line | awk '{ print $2; }')
     file=$(echo $line | awk '{ print $3; }')
 
-    echo "Configuring $printer..."
+    # Only configure if the printer does not exist
+    if [[ -z "$(lpoptions -p "$printer")" ]]; then
+      section "$SECTION"
+      echo "Configuring $printer..."
 
-    tell lpadmin -p "$printer" -E -v "$lpd" -P "$folder/ppd/$file"
-    tell lpoptions -p "$printer" -o printer-is-shared=false \
-                                 -o sides=two-sided-long-edge
+      tell lpadmin -p "$printer" -E -v "$lpd" -P "$folder/ppd/$file"
+      tell lpoptions -p "$printer" -o printer-is-shared=false \
+                                   -o sides=two-sided-long-edge
 
-    tell cupsaccept "$printer"
-    tell cupsenable "$printer"
+      tell cupsaccept "$printer"
+      tell cupsenable "$printer"
+    fi
   done
+}
+
+# General first steps
+function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+}
+
+function steps() {
+  enableCups
+  configurePrinters
+}
+
+# Update steps
+function update() { init; steps; }
+
+# Install steps
+function install() {
+  init
+  section "$SECTION"
+
+  steps
 } 
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

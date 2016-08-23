@@ -5,12 +5,34 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
+
+# Create directories
+function createFolders() {
+  cat "$folder/folders" | while IFS= read -r line; do
+    line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
+    [[ ! -d "$line" ]] && tell mkdir -p $line
+  done
+}
+
+# Create symlinks
+function createSymlinks() {
+  cat "$folder/links" | while IFS= read -r line; do
+    line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
+    link=$(echo $line | awk '{ print $1; }')
+    src=$(echo $line | awk '{ print $2; }')
+
+    safe_ln "$src" "$link"
+  done
+}
+
+# General initialisation steps
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
   source_stage "prep" all
-
-  section Environment
 
   folder="$DIR/$(pack_folder "$0")"
 
@@ -19,17 +41,29 @@ function init() {
   git=git
   db=dropbox
 
-  cat "$folder/folders" | while IFS= read -r line; do
-    line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
-    if [[ ! -d "$line" ]]
-    then
-      tell mkdir -p $line
-    fi
-  done
+  createFolders
+  createSymlinks
+}
+
+# Update steps
+function update() {
+  init
+
+  # Update the environment (if there is an internet connection)
+  if internet then;
+    section "$SECTION"
+    env-update
+  fi
+}
+
+# Preform install steps
+function install() {
+  init
+  section "$SECTION"
 
   tell cp -r "$DATA/config" "$env/$git"
 
-  cwd=$(pwd)
+  cwd="$(pwd)"
   cd "$env/$git"
   if [[ -f "./.gitmodules" ]]; then
     cat .gitmodules \
@@ -47,15 +81,8 @@ function init() {
     done;
   fi
   cd "$cwd"
-
-  cat "$folder/links" | while IFS= read -r line; do
-    line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
-    link=$(echo $line | awk '{ print $1; }')
-    src=$(echo $line | awk '{ print $2; }')
-
-    safe_ln "$src" "$link"
-  done
 } 
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

@@ -5,14 +5,26 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
+
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
+}
 
-  section "SSH Daemon"
-  
+# Do nothing on an update
+function update() { :; }
+
+# Install steps
+function install() {
+  init
+  section "$SECTION"
+
   tell systemctl enable sshd.service
 } 
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

@@ -5,17 +5,42 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
+
+# General initialization steps
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
 
-  section Localbin
-
   folder="$DIR/$(pack_folder "$0")"
-  localbin=/usr/local/bin/
+  localbin="/usr/local/bin/"
+}
+function installProgs() {
+  # Check if we need to update anything
+  if [[ -z "$(diff -r "$folder" "$localbin")" ]]; then
+    section "$SECTION"
 
-  tell cp -r $folder/* $localbin
+    tell cp -uvr $folder/* $localbin
+  fi
 }
 
+function steps() {
+  installProgs
+}
+
+# Update steps
+function update() { init; steps; }
+
+# Install steps
+function install() {
+  init
+  section "$SECTION"
+
+  steps
+} 
+
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

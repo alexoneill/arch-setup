@@ -5,15 +5,25 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
+
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
   source_stage "prep" all
 
-  section netctl-auto
-  
   folder="$DIR/$(pack_folder "$0")"
+  out="/etc/netctl"
+}
 
+function installProfiles() {
+  input="$1"
+
+  [[ -z "$(cat "$input")" ]] && return
+  section "$SECTION"
+  
   ifaces="$(mktemp)"
   if [[ "$(find /etc/netctl -maxdepth 1 -type f | wc -l)" == "0" ]]; then
     ip link | grep "^[0-9]:" \
@@ -37,8 +47,7 @@ function init() {
     echo "Assuming '$device' for wireless functionality"
     echo -n "Give alternate device (nothing means '$device' is okay): "
     read alt_dev
-    while [[ "$alt_dev" != "" && "$(grep "^$alt_dev\$" $ifaces)" == "" ]]
-    do
+    while [[ "$alt_dev" != "" && "$(grep "^$alt_dev\$" $ifaces)" == "" ]]; do
       echo -n "Invalid device. Choose another: "
       read alt_dev
     done
@@ -50,9 +59,6 @@ function init() {
     device=$(cat $ifaces)
   fi
 
-  # Setup for further lookup
-  echo "$device" > $WIFI_IFACE_FILE
-
   if [[ "$(systemctl is-enabled netctl-auto@$device.service)" \
           != "enabled" ]]; then
     echo "Using '$device' for wireless functionality"
@@ -61,55 +67,116 @@ function init() {
   fi
 
   # Ignore profiles we already have credentials for
-  for file in $(find "$folder/" -type f -not -name "cmu-secure"\
-                                        -not -name "eduroam"); do
+  cat "$input" | while IFS= read line; do
       if [[ ! -f "/etc/netctl/$(basename $file)" 
         || "$(grep "Interface=$device" \
                   /etc/netctl/$(basename $file))" == "" ]]; then
       tmp=$(mktemp)
-      cat "$file" | sed -e "s/\$INTERFACE/$device/g" | tee $tmp >/dev/null
+      cat "$file" | sed -e "s/\$INTERFACE/$device/g" \
+        > $tmp
        
-      if [[ "$(grep "\$PASSWORD" $tmp)" != "" ]]
-      then
+      if [[ "$(grep "\$PASSWORD" $tmp)" != "" ]]; then
         echo "Configuring $file"
         echo -n "Network password: "
         read pass
         
         otherTmp=$(mktemp)
-        tell_eval \
-          "cat $tmp | sed -e 's/\$PASSWORD/$pass/g' | tee $otherTmp >/dev/null"
+        cat $tmp | sed -e 's/\$PASSWORD/$pass/g' \
+          > $otherTmp
+
         tell cp $otherTmp $tmp
       fi
 
+      echo "Installing \`$file\'"
       tell cp $tmp "/etc/netctl/$(basename $file)"
     fi
   done
-    
+}
+
+function specialProfiles() {
   # Handle CMU Secure + Eduroam case (given password earlier)
   tmp=$(mktemp)
   pw_lookup andrew | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
 
-  echo "Configuring cmu-secure"
+  function _installer() {
+    _tmp="$(mktemp)"
+
+    cat "$folder/$file" | sed -e "s/\$INTERFACE/$device/g"
+      | sed -e "s/\$USER/$user/g"
+      | sed -e "s/\$PASSWORD/$password/g" > "$_tmp"
+
+    [[ -f "/etc/netctl/$file" ]] && 
+      [[ -z "$(diff "$_tmp" "/etc/netctl/$file")" ]] && return
+
+    section "$SECTION"
+    echo "Installing \`$folder/$file\'"
+    tell mv "$_tmp" "/etc/netctl/$file"
+  }
+
   file=cmu-secure
-  tell_eval "cat '$folder/$file' | sed -e 's/\$INTERFACE/$device/g' " \
-    "| sed -e 's/\$USER/$user/g' " \
-    "| sed -e 's/\$PASSWORD/$password/g' > '/etc/netctl/$file'"
+  _installer
 
-  echo "Configuring eduroam"
   file=eduroam
-  tell_eval "cat '$folder/$file' | sed -e 's/\$INTERFACE/$device/g' " \
-    "| sed -e 's/\$USER/$user/g' " \
-    "| sed -e 's/\$PASSWORD/$password/g' > '/etc/netctl/$file'"
-
-  # Fix completion issues
-  tell ln -s /usr/share/bash-completion/completions/{netctl,netctl-auto}
-} 
-
-function net_get_iface() {
-  cat $WIFI_IFACE_FILE
+  _installer
 }
 
+# Update steps
+function update() {
+  init
+
+  all="$(mktemp)"
+  find "$folder/" -type f -not -name "cmu-secure" \
+                          -not -name "eduroam" \
+    | sort > "$all"
+
+  installed="$(mktemp)"
+  find "$out" -maxdepth 1 -type f -not -name "cmu-secure" \
+                                  -not -name "eduroam" \
+    | sed -e "s|^$out/|$folder/|" \
+    | sort > "$installed"
+
+  # Get files that are missing in /etc/...
+  final=$(mktemp)
+  grep -vf "$installed" "$all" > "$final"
+
+  # Handle install for all missing profiles
+  installProfiles "$final"
+  rm -rf "$all" "$installed" "$final"
+
+  # Handle profiles that need extra attention
+  specialProfiles
+
+  # Fix completion issues
+  completions="/usr/share/bash-completion/completions/"
+  will_ln "$completions/netctl" "$completions/netctl-auto" &&
+    section "$SECTION"
+  safe_ln "$completions/netctl" "$completions/netctl-auto"
+}
+
+# Install steps
+function install() {
+  init
+  section "$SECTION"
+
+  all="$(mktemp)"
+  find "$folder/" -type f -not -name "cmu-secure" \
+                          -not -name "eduroam" \
+    | sort > "$all"
+
+  # Handle install for all missing profiles
+  installProfiles "$all"
+  rm -rf "$all"
+
+  # Handle profiles that need extra attention
+  specialProfiles
+
+  # Fix completion issues
+  completions="/usr/share/bash-completion/completions/"
+  safe_ln "$completions/netctl" "$completions/netctl-auto"
+}
+
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

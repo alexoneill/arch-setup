@@ -5,18 +5,48 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
+
+# General initialization
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
   source_stage "prep" all
 
-  section SLiM
-  
   folder="$DIR/$(pack_folder "$0")"
+  out="/etc/"
+  conf="slim.conf"
+}
 
-  tell cp "$folder/slim.conf" "/etc/slim.conf"
+# Copy the SLiM config only if it's new
+function copyConfig() {
+  tell cp -v "$folder/$conf" "$out/$conf"
+}
+
+# Update steps
+function update() {
+  init
+
+  # Skip this step if there is nothing to do
+  [[ -z "$(diff "$folder/$conf" "$out/$conf")" ]] && return
+  section "$SECTION"
+
+  # Sync the config, restart the service on an update
+  copyConfig
+  tell systemctl restart slim.service
+}
+
+# Install steps
+function install() {
+  init
+  section "$SECTION"
+
+  copyConfig
   tell systemctl enable slim.service
 } 
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

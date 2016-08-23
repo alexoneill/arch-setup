@@ -5,15 +5,55 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
+
+# General initialization
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
+}
 
-  section "Time and Date"
+# Ask the Ubuntu endpoint for the local timezone
+function getTimezone() {
+  tz="$(curl http://geoip.ubuntu.com/lookup 2>/dev/null \
+          | xmllint --xpath "/Response/TimeZone/text()" - && echo)"
+
+  # See if the curl failed
+  [[ "${PIPESTATUS[0]}" != "0" ]] && tz="UTC"
+
+  echo "$tz"
+}
+
+# Try getting an updated timezone
+function update() {
+  init
+
+  oldTz="$(timedatectl status \
+             | grep "^ \+Time zone:" \
+             | sed -e "s/^ \+Time zone: \([a-zA-Z0-9\/_]\+\) (.*)$/\1/")"
+  newTz="$(getTimezone)"
+
+  # Skip if the new TZ is UTC (we probably messed up)
+  [[ "$newTz" == "UTC" ]] && return
+
+  # Skip if the timezone didn't change
+  [[ "$oldTz" == "$newTz" ]] && return
   
+  section "$SECTION"
+  tell timedatectl set-timezone "$newTz"
+}
+
+# Preform install steps
+function install() {
+  init
+  section "$SECTION"
+
   tell systemctl enable ntpd.service
-  tell timedatectl set-timezone UTC
+  tell timedatectl set-timezone "$(getTimezone)"
 } 
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

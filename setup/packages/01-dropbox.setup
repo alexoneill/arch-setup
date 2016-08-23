@@ -5,30 +5,17 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-function init() {
-  # Source the driver
-  source "$DIR/$(basename "$DIR").sh"
-  source_stage "prep" all
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
 
-  section "Dropbox (filesystem stubs)"
+# Reset shown flag
+_SHOWN_SECTION=
 
-  folder="$DIR/$(pack_folder "$0")"
-  
-  # Get user
-  tmp=$(mktemp)
-  pw_lookup archlinux | tee $tmp >/dev/null
-  user=$(cat $tmp | head -n 1)
-
-  if [[ "$(systemctl is-enabled dropbox@$user.service)" != "enabled" ]]; then
-    tell_eval \
-      "cat '$folder/unit' | EDITOR=tee systemctl edit dropbox@$user.service"
-
-    tell systemctl enable dropbox@$user.service
-    tell systemctl start dropbox@$user.service
-  fi
-
-  if [[ ! -d "$(acc_get_home)/.data" ]]
-  then
+# Create the proper infrastructure
+function createFolders() {
+  if ! [[ -d "$(acc_get_home)/.data" ]]; then
+    section "$SECTION"
     tell mkdir -p $(acc_get_home)/.data
   fi
 
@@ -36,13 +23,60 @@ function init() {
     line=$(echo $line | sed -e "s|~|$(acc_get_home)|g")
     link=$(echo $line | awk '{ print $1; }')
     src=$(echo $line | awk '{ print $2; }')
+    cmd=$(echo $line | awk '{ $1=$2=""; print $0; }')
+
+    linked="$(will_safe_ln "$src" "$link"; echo "$?")"
+    (( linked )) && section "$SECTION"
 
     safe_ln "$src" "$link"
+    (( linked )) && [[ "$cmd" ]] && tell_eval "$cmd"
   done
+}
 
-  # Update databases
-  tell fc-cache
+# Enable the Dropbox daemon
+function enableDropbox() {
+  # Get user
+  tmp=$(mktemp)
+  pw_lookup archlinux | tee $tmp >/dev/null
+  user=$(cat $tmp | head -n 1)
+
+  override="/etc/systemd/system/dropbox@$user.service.d/override.conf"
+  [[ "$(systemctl is-enabled dropbox@$user.service)" == "enabled" ]] && return
+  [[ -f "$override" && -z "$(diff "$folder/unit" "$override")" ]] && return
+
+  section "$SECTION"
+  tell_eval \
+    "cat '$folder/unit' | EDITOR=tee systemctl edit dropbox@$user.service"
+
+  tell systemctl enable dropbox@$user.service
+  tell systemctl start dropbox@$user.service
+}
+
+# General first steps
+function init() {
+  # Source the driver
+  source "$DIR/$(basename "$DIR").sh"
+  source_stage "prep" all
+
+  folder="$DIR/$(pack_folder "$0")"
+}
+
+function steps() {
+  createFolders
+  enableDropbox
+}
+
+# Update steps
+function update() { init; steps; }
+
+# Install steps
+function install() {
+  init
+  section "$SECTION"
+
+  steps
 } 
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@

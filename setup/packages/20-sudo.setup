@@ -5,16 +5,43 @@
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Section name
+_NAME="$(basename "$0" | sed -e "s/^[0-9]\+-\([a-zA-Z0-9_-]\+\)\..*$/\1/")"
+SECTION="$(basename "$DIR") :: $_NAME"
+
+# General initialization steps
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
-
-  section sudo
+  section "$SECTION"
   
   folder="$DIR/$(pack_folder "$0")"
+  sudoersd="/etc/sudoers.d/"
+}
 
-  tell cp $folder/* /etc/sudoers.d/
+# Copy the configurations
+function copySudoConf() {
+  tell cp -ru "$folder/*" "$sudoersd"
+}
+
+# Only sync if there are differences on update
+function update() { 
+  init
+
+  [[ -z "$(diff -r "$folder" "$sudoersd")" ]] && return
+  section "$SECTION"
+
+  copySudoConf
+}
+
+# Install steps
+function install() {
+  init
+  section "$SECTION"
+
+  copySudoConf
 } 
 
+# Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
-[[ "$EXEC" == "1" ]] && init $@
+[[ "$EXEC" == "1" ]] && $MODE $@
