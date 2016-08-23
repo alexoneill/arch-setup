@@ -5,22 +5,22 @@
 _UI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
+  function show() {
+    ! (( QUIET )) && echo "$@"
+  }
+
   function tell() {
-    if [[ "$QUIET" != "1" ]]; then
-      echo $@
-    fi
-    if [[ "$DRY_RUN" != "1" ]]; then
-      $@
-    fi
+    show $@
+    ! (( DRY_RUN )) && $@
   }
 
   function tell_eval() {
-    if [[ "$QUIET" != "1" ]]; then
-      echo "$@"
-    fi
-    if [[ "$DRY_RUN" != "1" ]]; then
-      eval "$@"
-    fi
+    show $@
+    ! (( DRY_RUN )) && eval "$@"
+  }
+
+  function tell_always() {
+    DRY_RUN=0 tell $@
   }
     
   # Global for keeping track of which sections have been shown
@@ -38,14 +38,19 @@ function sourced() {
     textStart=$((($cols - ${#in}) / 2 - 1))
     head=$(printf "%-${cols}s" "#")
 
-    if [[ "$QUIET" != 1 ]]
-    then
-      echo "${head// /\#}"
-      printf "#%*s" $textStart " "
-      echo -n $in
-      printf "%*s\n" $(($cols - $textStart - ${#in} - 1)) "#"
-      echo "${head// /\#}"
-    fi
+    show "${head// /\#}"
+    show -n "$(printf "#%*s" $textStart " ")"
+    show -n $in
+    show "$(printf "%*s\n" $(($cols - $textStart - ${#in} - 1)) "#")"
+    show "${head// /\#}"
+  }
+
+  function skipped() {
+    in="$@"
+
+    # Continue if the section has not been shown
+    [[ -z "$(grep "$in" "$_UI_SECTION_TITLES")" ]] &&
+      show "skipped: \`$in'"
   }
 
   function minor_section() {
@@ -55,21 +60,17 @@ function sourced() {
     textStart=$((($cols - ${#in}) / 2))
     head=$(printf "%-${cols}s" " ")
 
-    if [[ "$QUIET" != 1 ]]
-    then
-      # Start with a new line
-      echo
+    # Start with a new line
+    show
 
-      printf "%*s" $textStart " "
-      echo $in
-      echo "${head// /=}"
-    fi
+    show "$(printf "%*s" $textStart " ")"
+    show $in
+    show "${head// /=}"
   }
 
   function pause() {
-    if [[ "$QUIET" != 1 ]]
-    then
-      echo -n "Press ENTER to continue..."
+    if ! (( QUIET )); then
+      show -n "Press ENTER to continue..."
       read ignored
     fi
   }

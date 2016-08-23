@@ -63,9 +63,9 @@ function update() {
   steps
 
   # Update the environment (if there is an internet connection)
-  if internet; then
+  if internet && su $user env-status; then
     section "$SECTION"
-    env-update
+    su $user env-update
   fi
 }
 
