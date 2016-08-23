@@ -15,9 +15,6 @@ fi
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Section name
-SECTION="$(basename "$DIR") :: $(basename "$0")"
-
 function init() {
   for file in $(find "$DIR" -maxdepth 1 -type f -name "*.setup" | sort); do
     [[ -x "$file" ]] && "$file"

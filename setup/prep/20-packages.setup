@@ -19,16 +19,16 @@ function init() {
 
 # Enable multilib for pacman
 function pacmanMultilib() {
-  [[ -z "$(grep -A 1 "^[multilib]" | grep "^Include=")" ]] &&
-    cat << EOF >> /etc/pacman.conf
-[multilib]
-Include = /etc/pacman.d/mirrorlist"
-EOF
+  config="/etc/pacman.conf"
+  if [[ -z "$(grep -A 1 "^[multilib]" "$config" | grep "^Include=")" ]]; then
+    tell_eval "echo '[multilib]' >> '$config'"
+    tell_eval "echo 'Include = /etc/pacman.d/mirrorlist' >> '$config'"
+  fi
 }
 
 # Patch makepkg to run as root (will be reverted later)
 function makepkgPatch() {
-  tell patch /usr/bin/makepkg < "$CONFIG_DIR/makepkgPatch.diff"
+  tell patch /usr/bin/makepkg < "$CONFIG_DIR/makepkg-patch.diff"
 } 
 
 # Temporary method to pull packages from AUR (to install yaourt)
@@ -105,11 +105,12 @@ function update() {
 function install() {
   init
 
+  # Add multilib support
   pacmanMultilib
 
   # Install standard packages
   installAllWithManager pacman
-
+  
   # Install needed packages to use yaourt
   minor_section "Packages -- yaourt / Setup"
   makepkgPatch
