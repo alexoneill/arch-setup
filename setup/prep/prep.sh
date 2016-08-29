@@ -4,12 +4,12 @@
 
 # Don't overwrite a previously set DIR
 if [[ "$DIR" != "" ]]; then
-  _OTHER_DIR="$DIR"
+  _OTHER_DIR_PREP="$DIR"
 fi
 
 # Don't overwrite a previously set SECTION
 if [[ "$DIR" != "" ]]; then
-  _OTHER_SECTION="$SECTION"
+  _OTHER_SECTION_PREP="$SECTION"
 fi
 
 # Location of this script
@@ -41,8 +41,8 @@ function sourced() {
     done
   fi
 
-  export DIR="$_OTHER_DIR"
-  export SECTION="$_OTHER_SECTION"
+  export DIR="$_OTHER_DIR_PREP"
+  export SECTION="$_OTHER_SECTION_PREP"
 }
 
 # Run `init' only when exec'd, run `sourced' only when sourced

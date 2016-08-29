@@ -7,7 +7,15 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function sourced() {
   # Source the driver
+  # Fix an issue with overwriting the secret variable
+  # (because it is being sourced twice)
+  local backup="$_OTHER_DIR_UTIL"
   source "$DIR/$(basename "$DIR").sh" "$(basename "${BASH_SOURCE[0]}")"
+  export _OTHER_DIR_UTIL="$backup"
+
+  function always() {
+    DRY_RUN=0 $@
+  }
 
   function show() {
     ! (( QUIET )) && echo "$@"
@@ -23,10 +31,6 @@ function sourced() {
     ! (( DRY_RUN )) && eval "$@"
   }
 
-  function tell_always() {
-    DRY_RUN=0 tell $@
-  }
-    
   # Global for keeping track of which sections have been shown
   [[ -z "$_UI_SECTION_TITLES" ]] && _UI_SECTION_TITLES="$(temp)"
 

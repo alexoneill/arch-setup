@@ -18,7 +18,7 @@ function init() {
 # Ask the Ubuntu endpoint for the local timezone
 function getTimezone() {
   tz="$(curl http://geoip.ubuntu.com/lookup 2>/dev/null \
-          | xmllint --xpath "/Response/TimeZone/text()" - && echo)"
+          | xmllint --xpath "/Response/TimeZone/text()" - 2>/dev/null && echo)"
 
   # See if the curl failed
   [[ "${PIPESTATUS[0]}" != "0" ]] && tz="UTC"

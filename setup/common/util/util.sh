@@ -4,7 +4,7 @@
 
 # Don't overwrite a previously set DIR
 if [[ "$DIR" != "" ]]; then
-  _OTHER_DIR="$DIR"
+  _OTHER_DIR_UTIL="$DIR"
 fi
 
 # Location of this script
@@ -28,7 +28,7 @@ function sourced() {
     done
   fi
 
-  export DIR="$_OTHER_DIR"
+  export DIR="$_OTHER_DIR_UTIL"
 }
 
 # Run `init' only when exec'd, run `sourced' only when sourced

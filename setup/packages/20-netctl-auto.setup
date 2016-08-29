@@ -18,12 +18,7 @@ function init() {
   out="/etc/netctl"
 }
 
-function installProfiles() {
-  input="$1"
-
-  [[ -z "$(cat "$input")" ]] && return
-  section "$SECTION"
-  
+function chooseInterface() {
   ifaces="$(temp)"
   if [[ "$(find /etc/netctl -maxdepth 1 -type f | wc -l)" == "0" ]]; then
     ip link | grep "^[0-9]:" \
@@ -37,28 +32,51 @@ function installProfiles() {
       | sort | uniq > $ifaces
   fi
 
-  device="$(grep wlp $ifaces | head -n 1)"
-
-  if [[ "$(wc -l $ifaces | sed -e "s/ .*$//")" == "0" ]]; then
-    echo "Uh oh! There are no wireless interfaces. Skipping..."
-    return
-  elif [[ "$(wc -l $ifaces | sed -e "s/ .*$//")" != "1" ]]; then
-    echo "Known interfaces: $(echo "$(cat $ifaces)")"
-    echo "Assuming '$device' for wireless functionality"
-    echo -n "Give alternate device (nothing means '$device' is okay): "
-    read alt_dev
-    while [[ "$alt_dev" != "" && "$(grep "^$alt_dev\$" $ifaces)" == "" ]]; do
-      echo -n "Invalid device. Choose another: "
-      read alt_dev
-    done
-
-    if [[ "$alt_dev" != "" ]]; then
-      device="$alt_dev"
-    fi
+  # Pre-populate an interface
+  if [[ -f "$WIFI_IFACE_FILE" ]]; then
+    device="$(cat "$WIFI_IFACE_FILE")"
   else
-    device=$(cat $ifaces)
+    device="$(grep wlp $ifaces | head -n 1)"
+
+    if [[ "$(wc -l $ifaces | sed -e "s/ .*$//")" == "0" ]]; then
+      section "$SECTION"
+      echo "Uh oh! There are no wireless interfaces. Skipping..."
+      return
+    elif [[ "$(wc -l $ifaces | sed -e "s/ .*$//")" -gt "1" ]]; then
+      section "$SECTION"
+      echo "Known interfaces: $(echo "$(cat $ifaces)")"
+      echo "Assuming '$device' for wireless functionality"
+      echo -n "Give alternate device (nothing means '$device' is okay): "
+      read alt_dev
+      while [[ "$alt_dev" != "" && "$(grep "^$alt_dev\$" $ifaces)" == "" ]]; do
+        echo -n "Invalid device. Choose another: "
+        read alt_dev
+      done
+
+      if [[ "$alt_dev" != "" ]]; then
+        device="$alt_dev"
+      fi
+    else
+      device=$(cat $ifaces)
+    fi
   fi
 
+  # Save interface choice
+  echo "$device" > "$WIFI_IFACE_FILE"
+}
+
+function getInterface() {
+  cat "$WIFI_IFACE_FILE"
+}
+
+function installProfiles() {
+  input="$1"
+
+  [[ -z "$(cat "$input")" ]] && return
+  section "$SECTION"
+
+  device="$(getInterface)"
+  
   if [[ "$(systemctl is-enabled netctl-auto@$device.service)" \
           != "enabled" ]]; then
     echo "Using '$device' for wireless functionality"
@@ -99,7 +117,10 @@ function specialProfiles() {
   pw_lookup andrew | tee $tmp >/dev/null
   user=$(cat $tmp | head -n 1)
   password=$(cat $tmp | tail -n 1)
+  
+  device="$(getInterface)"
 
+  installed=
   function _installer() {
     _tmp="$(temp)"
 
@@ -112,8 +133,9 @@ function specialProfiles() {
       [[ -z "$(diff "$_tmp" "/etc/netctl/$file")" ]] && return
 
     section "$SECTION"
-    echo "Installing \`$folder/$file'"
+    echo "Installing \`$(basename "$folder")/$file'"
     tell mv "$_tmp" "/etc/netctl/$file"
+    installed=1
   }
 
   file=cmu-secure
@@ -121,6 +143,10 @@ function specialProfiles() {
 
   file=eduroam
   _installer
+
+  # Reload netctl if there are changes
+  (( installed )) && 
+    tell systemctl restart netctl-auto@$device.service
 }
 
 # Update steps
@@ -141,6 +167,9 @@ function update() {
   # Get files that are missing in /etc/...
   final=$(temp)
   grep -vf "$installed" "$all" > "$final"
+
+  # Choose network interface
+  chooseInterface
 
   # Handle install for all missing profiles
   installProfiles "$final"
@@ -168,6 +197,9 @@ function install() {
   find "$folder/" -type f -not -name "cmu-secure" \
                           -not -name "eduroam" \
     | sort > "$all"
+
+  # Choose network interface
+  chooseInterface
 
   # Handle install for all missing profiles
   installProfiles "$all"

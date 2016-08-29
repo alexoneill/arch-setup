@@ -50,14 +50,15 @@ function args() {
 }
 
 # Function run at the end
+CLEAN=0
 function trapped() {
-  echo -e "\n"
+  ! (( CLEAN )) && echo -e "\n"
 
   # Lock the password file
   pw_lock
 
   # Remove temporary files
-  tell_always rm -rf "$TEMP_PREFIX.*"
+  always tell_eval "rm -rf '$TEMP_PREFIX.*'"
 }
 
 function blurb() {
@@ -83,7 +84,7 @@ function init() {
   if [[ "$(whoami)" != "root" ]]; then
     # Run as root if available
     if which sudo &>/dev/null; then
-      tell_always sudo $0 $_args
+      always tell sudo $0 $_args
       return $?
     fi
 
@@ -138,6 +139,8 @@ function init() {
       echo "'reboot' to apply all changes"
     fi
   fi
+
+  CLEAN=1
 }
 
 # Run init only when exec'd

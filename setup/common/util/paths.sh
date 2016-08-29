@@ -17,6 +17,7 @@ function sourced() {
   # Variables for paths to things
   export PASSWD_FILE="$DATA/passwords"
   export HOMEDIR_FILE="$DATA/homedir"
+  export WIFI_IFACE_FILE="$DATA/wifi_iface"
 }
 
 # Designed for sourcing
