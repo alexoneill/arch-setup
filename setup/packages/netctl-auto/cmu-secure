@@ -13,4 +13,5 @@ WPAConfigSection=(
 	'eap=PEAP'
 	'identity="$USER"'
 	'password="$PASSWORD"'
+  'priority=1'
 )
