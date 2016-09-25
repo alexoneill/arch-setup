@@ -24,7 +24,7 @@ function init() {
 function sourced() {
   SETUP="$(cd "$DIR/../" && pwd)"
   source "$SETUP/common/util/util.sh" "all"
-  
+
   passed="$1"
   function gate() {
     if [[ "$passed" == "all" ]]; then
@@ -37,6 +37,7 @@ function sourced() {
   if [[ "$passed" != "" ]]; then
     for file in $(find "$DIR" -maxdepth 1 -type f -name "*.setup" \
                     | gate | sort); do
+
       [[ -x "$file" ]] && source "$file"
     done
   fi

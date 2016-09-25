@@ -38,7 +38,7 @@ function args() {
       -u|--update)
         export MODE="update"
         ;;
-      
+
       *)
         usage $_args
         return 1
@@ -55,6 +55,7 @@ function trapped() {
   ! (( CLEAN )) && echo -e "\n"
 
   # Lock the password file
+  source "$SETUP/setup.sh" "$SETUP_PREP" "all"
   pw_lock
 
   # Remove temporary files
@@ -62,7 +63,7 @@ function trapped() {
 }
 
 function blurb() {
-  section "Alex O'Neill's Arch Customizer"  
+  section "Alex O'Neill's Arch Customizer"
 
   echo -e "\
 This is intended to configure a vanilla installation of Arch Linux to be
@@ -125,14 +126,14 @@ function init() {
       pause
 
       "$SETUP/setup.sh" $SETUP_PREP
-      
+
       echo "'reboot' and run '$0' from Arch install"
     else
       blurb
       echo "Currently configuring while truly booted into Arch. Skipping"
       echo "initial configuration, working on package-specific configuration."
       pause
-      
+
       "$SETUP/setup.sh" $SETUP_PACK
       "$SETUP/setup.sh" $SETUP_POST
 

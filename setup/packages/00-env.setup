@@ -94,13 +94,13 @@ function install() {
       for i in $(seq 1 $((slashes - 1))); do
         rel="$rel/.."
       done;
-      
+
       tell_eval "echo 'gitdir: $rel/.git/modules/$line' > '$line/.git'"
       tell chown $user:$user "$line/.git"
     done;
   fi
   cd "$cwd"
-} 
+}
 
 # Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

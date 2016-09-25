@@ -13,10 +13,12 @@ SECTION="$(basename "$DIR") :: $_NAME"
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
- 
+
   python=/usr/bin/python
+  ipython=/usr/bin/ipython
   vers="2.7"
-} 
+  ivers="2"
+}
 
 # Update steps
 function update() {
@@ -24,11 +26,16 @@ function update() {
 
   # Only continue if Python is not the right version
   [[ "$(readlink -f "$python")" =~ "python${vers}" ]] && return
+  [[ "$(readlink -f "$ipython")" =~ "ipython${ivers}" ]] && return
   section "$SECTION"
 
   # Make Python 2.7 the default
   tell rm $python
-  safe_ln ${python}2.7 $python
+  safe_ln ${python}${vers} $python
+
+  # Make iPython2 the default
+  tell rm $ipython
+  safe_ln ${ipython}${ivers} $ipython
 
   # Notify if nothing happened
   skipped "$SECTION"
@@ -42,7 +49,7 @@ function install() {
   # Make Python 2.7 the default
   tell rm $python
   safe_ln ${python}2.7 $python
-} 
+}
 
 # Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

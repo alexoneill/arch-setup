@@ -19,7 +19,7 @@ function sourced() {
 
     source "$SETUP/$driver/$driver.sh" $@
   }
-} 
+}
 
 # Designed for sourcing
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
