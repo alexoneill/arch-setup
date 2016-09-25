@@ -9,12 +9,22 @@ BUILD_DIR="$DIR/build"
 DIST_DIR="airootfs/root/arch-setup"
 
 function args() {
+  export CACHING=1
+  export CLEAN_BUILD=0
   export QUIET=0
   export DRY_RUN=0
 
   while [[ ${1:0:1} == - ]]; do
     term="$1"
     case "$term" in
+      -c|--no-caching)
+        export CACHING=0
+        ;;
+
+      -b|--clean-build)
+        export CLEAN_BUILD=1
+        ;;
+
       -q|--quiet)
         export QUIET=1
         ;;
@@ -41,7 +51,7 @@ function archiso {
   section archiso
 
   # Distribute Arch ISO materials
-  tell cp -r /usr/share/archiso/configs/releng/* "$BUILD_DIR/"
+  tell cp -r "/usr/share/archiso/configs/releng/*" "$BUILD_DIR/"
 
   # Copy this repo into the filesystem
   tell mkdir -p "$BUILD_DIR/$DIST_DIR"
@@ -58,7 +68,7 @@ function airootfs() {
 
   dist="$(echo "$DIST_DIR" | sed -e "s|^.*airootfs/root/||g")"
   tell_eval "cat <(echo 'DIST_DIR=$dist') '$CUSTOMIZE_PATH' >> " \
-    "'$BUILD_DIR/airootfs/root/customize_airootfs.sh'"
+    "'$BUILD_DIR/airootfs/root/setup.sh'"
 }
 
 function packages() {
@@ -74,40 +84,73 @@ function packages() {
   fi
 
   # Cache official packages
-  echo "Caching packages for pacman..."
-  tell pacman --noconfirm -Sy
+  if (( CACHING )); then
+    echo "Caching packages for pacman..."
+    tell pacman --noconfirm -Sy
 
-  dir="$PACKAGES/pacman"
-  for file in $(find $dir -maxdepth 1 -type f | sort)
-  do
-    if [[ "$needSudo" == "1" ]]; then
-      tell sudo pacman --noconfirm -Sw --cachedir "$cache" $(cat "$file")
-    else
-      tell pacman --noconfirm -Sw --cachedir "$cache" $(cat "$file")
-    fi
-  done
+    dir="$PACKAGES/pacman"
+    for file in $(find $dir -maxdepth 1 -type f | sort); do
+      if [[ "$needSudo" == "1" ]]; then
+        tell sudo pacman --noconfirm -Sw --cachedir "$cache" $(cat "$file")
+      else
+        tell pacman --noconfirm -Sw --cachedir "$cache" $(cat "$file")
+      fi
+    done
 
-  # Cache community packages
-  echo "Caching packages for yaourt..."
-  dir="$PACKAGES/yaourt"
-  for file in $(find $dir -maxdepth 1 -type f | sort)
-  do
-    if [[ "$needSudo" == "1" ]]; then
-      tell sudo yaourt --noconfirm -Syw --cachedir "$cache" $(cat "$file")
-    else
-      tell yaourt --noconfirm -Syw --cachedir "$cache" $(cat "$file")
-    fi
-  done
+    #### Disabled until Yaourt supports caching
+    # Cache community packages
+    # echo "Caching packages for yaourt..."
+    # dir="$PACKAGES/yaourt"
+    # for file in $(find $dir -maxdepth 1 -type f | sort); do
+    #   if [[ "$needSudo" == "1" ]]; then
+    #     tell sudo yaourt --noconfirm -Syw --cachedir "$cache" $(cat "$file")
+    #   else
+    #     tell yaourt --noconfirm -Syw --cachedir "$cache" $(cat "$file")
+    #   fi
+    # done
+  fi
+}
+
+function build() {
+  section build
+
+  # Build the ISO
+  mkdir "$BUILD_DIR/out"
+
+  cd "$BUILD_DIR"
+  tell ./build.sh -v
+  cd "$DIR"
+
+  # Copy it here and fix permissions
+  tell chown $SUDO_USER "$BUILD_DIR/out/*.iso"
+  tell cp "$BUILD_DIR/out/*.iso" "$DIR"
+
+  # Optionally wipe the build directory
+  (( CLEAN_BUILD )) && tell rm -rf "$BUILD_DIR"
 }
 
 function init() {
   # Populate variables
-  args $@
+  local _args="$@"
+  args $@ || return
   shift $#
 
   # Get various tools
   source "$SETUP/setup.sh"
-  CUSTOMIZE_PATH="$AIROOTFS/customize.sh"
+
+  # Need root-level permissions
+  if [[ "$(whoami)" != "root" ]]; then
+    # Run as root if available
+    if which sudo &>/dev/null; then
+      always tell sudo $0 $_args
+      return $?
+    fi
+
+    echo "Need root-level access. Run as root!"
+    return 1
+  fi
+
+  CUSTOMIZE_PATH="$AIROOTFS/setup.sh"
 
   if ! [[ -d "/usr/share/archiso" ]]; then
     echo "error: \`archiso' not installed! Will not continue"
@@ -131,6 +174,8 @@ function init() {
   archiso
   airootfs
   packages
+
+  build
 }
 
 # Run init only when run

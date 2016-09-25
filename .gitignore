@@ -3,6 +3,7 @@
 
 # Ignore ISO build
 build/
+*.iso
 
 # Ignore generated data
 data/

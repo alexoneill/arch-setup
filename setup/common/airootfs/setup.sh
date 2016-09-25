@@ -62,7 +62,7 @@ function init() {
     return 1
   fi
 
-  return 1
+  return 0
   cd $HOME/$DIST_DIR/
   ./configure
 }
