@@ -6,7 +6,9 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SETUP="$DIR/setup"
 
 BUILD_DIR="$DIR/build"
-DIST_DIR="airootfs/root/arch-setup"
+ARCHISO_BUILD_DIR="$BUILD_DIR/archiso"
+CACHE_DIR="$BUILD_DIR/cache"
+DIST_DIR="$ARCHISO_BUILD_DIR/airootfs/root/arch-setup"
 
 function args() {
   export CACHING=1
@@ -41,26 +43,30 @@ function args() {
 function setup() {
   section setup
 
-  if [[ -d "$BUILD_DIR" ]]; then
-    tell rm -rf "$BUILD_DIR"
+  # Remove the ArchISO build area if it exists (tough to recreate)
+  if [[ -d "$ARCHISO_BUILD_DIR" ]]; then
+    tell rm -rf "$ARCHISO_BUILD_DIR"
   fi
-  tell mkdir -p $BUILD_DIR
+
+  tell mkdir -p "$BUILD_DIR"
+  tell mkdir -p "$ARCHISO_BUILD_DIR"
+  tell mkdir -p "$CACHE_DIR"
 }
 
 function archiso {
   section archiso
 
   # Distribute Arch ISO materials
-  tell cp -r "/usr/share/archiso/configs/releng/*" "$BUILD_DIR/"
+  tell cp -r "/usr/share/archiso/configs/releng/*" "$ARCHISO_BUILD_DIR/"
 
   # Copy this repo into the filesystem
-  tell mkdir -p "$BUILD_DIR/$DIST_DIR"
+  tell mkdir -p "$DIST_DIR"
 
   tell_eval "find . -maxdepth 1 -not -name '$(basename "$BUILD_DIR")' " \
     "-not -path '*.git*' " \
     "-not -name '$(basename "$0")' " \
     "-not -path . " \
-    "| xargs cp -rt '$BUILD_DIR/$DIST_DIR'"
+    "| xargs cp -rt '$DIST_DIR'"
 }
 
 function airootfs() {
@@ -68,20 +74,11 @@ function airootfs() {
 
   dist="$(echo "$DIST_DIR" | sed -e "s|^.*airootfs/root/||g")"
   tell_eval "cat <(echo 'DIST_DIR=$dist') '$CUSTOMIZE_PATH' >> " \
-    "'$BUILD_DIR/airootfs/root/setup.sh'"
+    "'$ARCHISO_BUILD_DIR/airootfs/root/setup.sh'"
 }
 
 function packages() {
   section packages
-
-  cache="$BUILD_DIR/airootfs/root/pacman_cache"
-  tell mkdir -p "$BUILD_DIR"
-
-  needSudo="$(test "$(whoami)" == "root"; echo "$?")"
-  if [[ "$needSudo" == "1" ]]; then
-    echo "Requesting root access..."
-    tell sudo -v
-  fi
 
   # Cache official packages
   if (( CACHING )); then
@@ -90,11 +87,7 @@ function packages() {
 
     dir="$PACKAGES/pacman"
     for file in $(find $dir -maxdepth 1 -type f | sort); do
-      if [[ "$needSudo" == "1" ]]; then
-        tell sudo pacman --noconfirm -Sw --cachedir "$cache" $(cat "$file")
-      else
-        tell pacman --noconfirm -Sw --cachedir "$cache" $(cat "$file")
-      fi
+      tell pacman --noconfirm -Sw --cachedir "$CACHE_DIR" $(cat "$file")
     done
 
     #### Disabled until Yaourt supports caching
@@ -102,12 +95,13 @@ function packages() {
     # echo "Caching packages for yaourt..."
     # dir="$PACKAGES/yaourt"
     # for file in $(find $dir -maxdepth 1 -type f | sort); do
-    #   if [[ "$needSudo" == "1" ]]; then
-    #     tell sudo yaourt --noconfirm -Syw --cachedir "$cache" $(cat "$file")
-    #   else
-    #     tell yaourt --noconfirm -Syw --cachedir "$cache" $(cat "$file")
-    #   fi
+    #   tell yaourt --noconfirm -Syw --cachedir "$CACHE_DIR" $(cat "$file")
     # done
+
+    # Copy over the cached packages
+    cache="$ARCHISO_BUILD_DIR/airootfs/root/package_cache"
+    tell mkdir -p "$cache"
+    tell cp -v "$CACHE_DIR/*" "$cache/"
   fi
 }
 
@@ -115,17 +109,17 @@ function build() {
   section build
 
   # Build the ISO
-  mkdir "$BUILD_DIR/out"
+  mkdir "$ARCHISO_BUILD_DIR/out"
 
-  cd "$BUILD_DIR"
+  cd "$ARCHISO_BUILD_DIR"
   tell ./build.sh -v
   cd "$DIR"
 
   # Copy it here and fix permissions
-  tell chown $SUDO_USER "$BUILD_DIR/out/*.iso"
-  tell cp "$BUILD_DIR/out/*.iso" "$DIR"
+  tell chown $SUDO_USER "$ARCHISO_BUILD_DIR/out/*.iso"
+  tell mv "$ARCHISO_BUILD_DIR/out/*.iso" "$DIR"
 
-  # Optionally wipe the build directory
+  # Optionally wipe the build directory (cache included)
   (( CLEAN_BUILD )) && tell rm -rf "$BUILD_DIR"
 }
 
@@ -160,12 +154,6 @@ function init() {
   which pacman yaourt 2>&1 >/dev/null
   if [[ "$?" == "1" ]]; then
     echo "error: \`pacman' or \`yaourt' not installed! Will not continue"
-    return
-  fi
-
-  which sudo 2>&1 >/dev/null
-  if [[ "$?" != "0" && "$(whoami)" != "root" ]]; then
-    echo "error: No access to root-privileges! Will not continue"
     return
   fi
 
