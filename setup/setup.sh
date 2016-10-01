@@ -2,6 +2,12 @@
 # setup.sh
 # aoneill - 07/27/16
 
+# Don't overwrite a previously set DIR
+if [[ "$DIR" != "" ]]; then
+  _OTHER_DIR_SETUP="$DIR"
+fi
+
+# Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function init() {
@@ -24,6 +30,8 @@ function sourced() {
   export SETUP_POST="post-install"
 
   [[ "$#" -gt "0" ]] && source_stage $@
+
+  export DIR="$_OTHER_DIR_SETUP"
 }
 
 # Run init only when run

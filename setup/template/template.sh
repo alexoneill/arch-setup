@@ -1,15 +1,15 @@
 #!/bin/bash
-# driver.sh
+# template.sh
 # aoneill - 08/23/16
 
 # Don't overwrite a previously set DIR
 if [[ "$DIR" != "" ]]; then
-  _OTHER_DIR="$DIR"
+  _OTHER_DIR_TEMPLATE="$DIR"
 fi
 
 # Don't overwrite a previously set SECTION
 if [[ "$DIR" != "" ]]; then
-  _OTHER_SECTION="$SECTION"
+  _OTHER_SECTION_TEMPLATE="$SECTION"
 fi
 
 # Location of this script
@@ -24,7 +24,7 @@ function init() {
 function sourced() {
   SETUP="$(cd "$DIR/../" && pwd)"
   source "$SETUP/common/util/util.sh" "all"
-  
+
   passed="$1"
   function gate() {
     if [[ "$passed" == "all" ]]; then
@@ -42,8 +42,8 @@ function sourced() {
     done
   fi
 
-  export DIR="$_OTHER_DIR"
-  export SECTION="$_OTHER_SECTION"
+  export DIR="$_OTHER_DIR_TEMPLATE"
+  export SECTION="$_OTHER_SECTION_TEMPLATE"
 }
 
 # Run `init' only when exec'd, run `sourced' only when sourced

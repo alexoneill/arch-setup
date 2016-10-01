@@ -24,7 +24,7 @@ function init() {
 function sourced() {
   SETUP="$(cd "$DIR/../" && pwd)"
   source "$SETUP/common/util/util.sh" "all"
-  
+
   passed="$1"
   function gate() {
     if [[ "$passed" == "all" ]]; then
