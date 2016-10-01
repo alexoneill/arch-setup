@@ -13,6 +13,7 @@ DIST_DIR="$ARCHISO_BUILD_DIR/airootfs/root/arch-setup"
 function args() {
   export CACHING=1
   export CLEAN_BUILD=0
+  export VANILLA=0
   export QUIET=0
   export DRY_RUN=0
 
@@ -27,6 +28,10 @@ function args() {
         export CLEAN_BUILD=1
         ;;
 
+      -l|--vanilla)
+        export VANILLA=1
+        ;;
+
       -q|--quiet)
         export QUIET=1
         ;;
@@ -38,6 +43,35 @@ function args() {
 
     shift 1
   done
+}
+
+function vanilla() {
+  section vanilla
+
+  # Check that we have what we need
+  which curl md5sum wget 2>&1 >/dev/null
+  if [[ "$?" == "1" ]]; then
+    echo "error: \`curl', \`md5sum' or \`wget' not installed! Will not continue"
+    return 1
+  fi
+
+  # A reliable mirror
+  url="http://mirror.rackspace.com/archlinux/iso/latest/"
+  sums="$url/md5sums.txt"
+
+  # Get the latest version
+  version="$(curl "$url" 2>/dev/null \
+             | grep ".iso\"" \
+             | sed -e "s/.*href=\"\(.*\)\".*/\1/g")"
+
+  # Check if one exists, and if it matches the md5 sum, do nothing
+  [[ -f "$version" ]] && \
+    md5sum "$version" | grep -qFf <(curl "$sums" 2>/dev/null) && \
+    return 0
+
+  # Grab it!
+  tell rm -f "${version}"
+  tell wget "${url}${version}" -O "${version}"
 }
 
 function setup() {
@@ -126,11 +160,16 @@ function build() {
 function init() {
   # Populate variables
   local _args="$@"
-  args $@ || return
+  args $@ || return 1
   shift $#
 
   # Get various tools
   source "$SETUP/setup.sh"
+
+  if (( VANILLA )); then
+    vanilla
+    return $?
+  fi
 
   # Need root-level permissions
   if [[ "$(whoami)" != "root" ]]; then
@@ -148,13 +187,13 @@ function init() {
 
   if ! [[ -d "/usr/share/archiso" ]]; then
     echo "error: \`archiso' not installed! Will not continue"
-    return
+    return 1
   fi
 
   which pacman yaourt 2>&1 >/dev/null
   if [[ "$?" == "1" ]]; then
     echo "error: \`pacman' or \`yaourt' not installed! Will not continue"
-    return
+    return 1
   fi
 
   setup
