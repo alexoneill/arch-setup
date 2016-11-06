@@ -2,3 +2,4 @@ cups
 foomatic-db
 foomatic-db-nonfree
 foomatic-db-engine
+gtk3-print-backends
