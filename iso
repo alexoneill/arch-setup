@@ -87,7 +87,7 @@ function setup() {
   tell mkdir -p "$CACHE_DIR"
 }
 
-function archiso {
+function archiso() {
   section archiso
 
   # Distribute Arch ISO materials
@@ -96,7 +96,9 @@ function archiso {
   # Copy this repo into the filesystem
   tell mkdir -p "$DIST_DIR"
 
-  tell_eval "find . -maxdepth 1 -not -name '$(basename "$BUILD_DIR")' " \
+  tell_eval "find . -maxdepth 1  "\
+    "-not -name '$(basename "$BUILD_DIR")' " \
+    "-not -name '$(basename "$CACHE_DIR")' " \
     "-not -path '*.git*' " \
     "-not -name '$(basename "$0")' " \
     "-not -path . " \
