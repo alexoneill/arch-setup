@@ -6,8 +6,8 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SETUP="$DIR/setup"
 
 BUILD_DIR="$DIR/build"
+CACHE_DIR="$DIR/cache"
 ARCHISO_BUILD_DIR="$BUILD_DIR/archiso"
-CACHE_DIR="$BUILD_DIR/cache"
 DIST_DIR="$ARCHISO_BUILD_DIR/airootfs/root/arch-setup"
 
 function args() {
@@ -124,13 +124,12 @@ function packages() {
       tell pacman --noconfirm -Sw --cachedir "$CACHE_DIR" $(cat "$file")
     done
 
-    #### Disabled until Yaourt supports caching
     # Cache community packages
-    # echo "Caching packages for yaourt..."
-    # dir="$PACKAGES/yaourt"
-    # for file in $(find $dir -maxdepth 1 -type f | sort); do
-    #   tell yaourt --noconfirm -Syw --cachedir "$CACHE_DIR" $(cat "$file")
-    # done
+    echo "Caching packages for pacaur..."
+    dir="$PACKAGES/pacaur"
+    for file in $(find $dir -maxdepth 1 -type f | sort); do
+      tell pacaur --aur --noconfirm -Syw --cachedir "$CACHE_DIR" $(cat "$file")
+    done
 
     # Copy over the cached packages
     cache="$ARCHISO_BUILD_DIR/airootfs/root/package_cache"
@@ -190,9 +189,9 @@ function init() {
     return 1
   fi
 
-  which pacman yaourt 2>&1 >/dev/null
+  which pacman pacaur 2>&1 >/dev/null
   if [[ "$?" == "1" ]]; then
-    echo "error: \`pacman' or \`yaourt' not installed! Will not continue"
+    echo "error: \`pacman' or \`pacaur' not installed! Will not continue"
     return 1
   fi
 

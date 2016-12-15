@@ -29,13 +29,13 @@ function pacmanMultilib() {
 # Patch makepkg to run as root (will be reverted later)
 function makepkgPatch() {
   tell patch /usr/bin/makepkg < "$CONFIG_DIR/makepkg-patch.diff"
-} 
+}
 
-# Temporary method to pull packages from AUR (to install yaourt)
+# Temporary method to pull packages from AUR (to install pacaur)
 function aurShim() {
   pkg="$1"
   cwd=$(pwd)
-  
+
   filename="${pkg}.tar.gz"
   echo "Installing $pkg from AUR..."
 
@@ -55,9 +55,9 @@ function aurShim() {
 }
 
 function installAllWithManager() {
-  manager="$1"
+  manager="$@"
 
-  dir="$PACKAGES/$manager"
+  dir="$PACKAGES/${manager%% *}"
   for file in $(find $dir -maxdepth 1 -type f | sort)
   do
     # Filter packages that already exist
@@ -97,8 +97,8 @@ function update() {
   # Install standard packages
   installAllWithManager pacman
 
-  # Install yaourt packages
-  installAllWithManager yaourt
+  # Install pacaur packages
+  installAllWithManager pacaur --aur
 
   # Notify if nothing happened
   skipped "$SECTION"
@@ -113,16 +113,15 @@ function install() {
 
   # Install standard packages
   installAllWithManager pacman
-  
-  # Install needed packages to use yaourt
-  minor_section "Packages -- yaourt / Setup"
-  makepkgPatch
-  aurShim package-query
-  aurShim yaourt
 
-  # Install yaourt packages
-  installAllWithManager yaourt
-  
+  # Install needed packages to use pacaur
+  minor_section "Packages -- pacaur / Setup"
+  makepkgPatch
+  aurShim pacaur
+
+  # Install pacaur packages
+  installAllWithManager pacaur --aur
+
   # Revert changes to makepkg
   minor_section "Packages -- Cleanup"
   tell pacman --noconfirm -S pacman
