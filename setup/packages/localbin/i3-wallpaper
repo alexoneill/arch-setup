@@ -11,7 +11,7 @@ else
 fi
 
 # Photo dir
-dir="$home/dropbox/Images/Wallpapers/Computer"
+dir="$home/drive/Images/Wallpapers/Computer"
 
 # File and path
 cd "$dir"

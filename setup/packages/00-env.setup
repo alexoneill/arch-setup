@@ -48,7 +48,6 @@ function init() {
   env=$(acc_get_home)/.env
   config=$(acc_get_home)/.config
   git=git
-  db=dropbox
 }
 
 function steps() {
