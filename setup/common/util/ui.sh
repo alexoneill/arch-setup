@@ -82,7 +82,7 @@ function sourced() {
       read ignored
     fi
   }
-} 
+}
 
 # Designed for sourcing
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

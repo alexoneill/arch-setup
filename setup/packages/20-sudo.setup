@@ -13,7 +13,7 @@ SECTION="$(basename "$DIR") :: $_NAME"
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
-  
+
   folder="$DIR/$(pack_folder "$0")"
   sudoersd="/etc/sudoers.d/"
 }
@@ -24,10 +24,13 @@ function copySudoConf() {
 }
 
 # Only sync if there are differences on update
-function update() { 
+function update() {
   init
 
-  [[ -z "$(diff -r "$folder" "$sudoersd")" ]] && return
+  # See if our version differs from theirs
+  [[ -z "$(diff -r "$folder" "$sudoersd")" ]] &&
+    skipped "$SECTION" && return
+
   section "$SECTION"
 
   copySudoConf
@@ -42,7 +45,7 @@ function install() {
   section "$SECTION"
 
   copySudoConf
-} 
+}
 
 # Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

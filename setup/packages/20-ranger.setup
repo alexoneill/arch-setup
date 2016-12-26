@@ -14,7 +14,7 @@ function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
   source_stage "prep" all
- 
+
   folder="$DIR/$(pack_folder "$0")"
   ranger=/usr/bin/ranger
 }
@@ -29,9 +29,10 @@ function patchRanger() {
 }
 
 # Patch ranger if it needs it on update
-function update() { 
+function update() {
   init
-  [[ -n "$(head -n 1 $ranger | grep "/usr/bin/python3 -O")" ]] && return
+  [[ -n "$(head -n 1 $ranger | grep "/usr/bin/python3 -O")" ]] &&
+    skipped "$SECTION" && return
 
   section "$SECTION"
   patchRanger
@@ -46,7 +47,7 @@ function install() {
   section "$SECTION"
 
   patchRanger
-} 
+}
 
 # Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

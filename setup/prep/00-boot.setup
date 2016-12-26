@@ -11,7 +11,7 @@ SECTION="$(basename "$DIR") :: $_NAME"
 
 # Install the configuration if it doesn't exist or is different from our copy
 function installConf() {
-  [[ -f "$out/loader.conf" ]] && 
+  [[ -f "$out/loader.conf" ]] &&
     [[ -z "$(diff "$folder/loader.conf" "$out/loader.conf")" ]] &&
       return
 
@@ -23,11 +23,11 @@ function installConf() {
 function init() {
   # Source the driver
   source "$DIR/$(basename "$DIR").sh"
- 
+
   folder="$DIR/$(pack_folder "$0")"
   out="/boot/loader"
   ent="entries"
-  
+
   installConf
 }
 
@@ -43,21 +43,21 @@ function installEntries() {
     # See if we need to populate a PARTUUID
     if [[ -n "$(grep -i linux $file)" ]]; then
       os=$(grep "^title\s" $file | sed -e "s/^title\s\+//")
-    
+
       while true; do
         echo -n "Partition for \"$os\" ($(ls /dev/sd[a-z][0-9] \
                                            | tr "\n" " ")): "
         read dev
-        
+
         if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
           break
-        fi 
+        fi
       done
-      
-      uuid=$(blkid -s PARTUUID -o value $dev)    
+
+      uuid=$(blkid -s PARTUUID -o value $dev)
       tmp=$(temp)
       sed -e "s/PARTUUID/PARTUUID=$uuid/g" $file > $tmp
-      
+
       file=$(basename $file)
       tell mv $tmp "$out/$ent/$file"
     else
@@ -76,13 +76,12 @@ function update() {
 
   installed=$(temp)
   find "$out/$ent/" -type f | sed -e "s|^$out/$ent/|$folder/$ent/|" \
-                            | sort > "$installed" 
+                            | sort > "$installed"
 
   # Get files that are missing in /boot/...
   final=$(temp)
   grep -vf "$installed" "$all" > "$final"
 
-  cat $final
   installEntries "$final"
   rm -rf "$all" "$installed" "$final"
 
@@ -93,7 +92,7 @@ function update() {
 # Setup boot options
 function install() {
   init
-  
+
   section "$SECTION"
 
   # Clean up previous sections
@@ -104,18 +103,18 @@ function install() {
     echo -n "Boot device ($(ls /dev/sd[a-z][0-9] \
                              | tr "\n" " ")): "
     read dev
-    
+
     if [[ $dev =~ /dev/sd[a-z][0-9]+ ]]; then
       tell mount $dev /boot
     else
       dev=
     fi
-  done 
+  done
 
   # Re-populate /boot with proper images
   tell pacman --noconfirm -S linux
   tell bootctl --no-variables --path=/boot install
-  
+
   entries="$(temp)"
   find "$folder/$ent/" -type f > "$entries"
   installEntries "$entries"

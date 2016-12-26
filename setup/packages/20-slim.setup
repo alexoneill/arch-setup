@@ -30,7 +30,9 @@ function update() {
   init
 
   # Skip this step if there is nothing to do
-  [[ -z "$(diff "$folder/$conf" "$out/$conf")" ]] && return
+  [[ -z "$(diff "$folder/$conf" "$out/$conf")" ]] &&
+    skipped "$SECTION" && return
+
   section "$SECTION"
 
   # Sync the config, restart the service on an update
@@ -48,7 +50,7 @@ function install() {
 
   copyConfig
   tell systemctl enable slim.service
-} 
+}
 
 # Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)

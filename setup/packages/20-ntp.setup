@@ -17,7 +17,8 @@ function init() {
 
 # Ask the Ubuntu endpoint for the local timezone
 function getTimezone() {
-  tz="$(curl http://geoip.ubuntu.com/lookup 2>/dev/null \
+  internet && \
+    tz="$(curl http://geoip.ubuntu.com/lookup 2>/dev/null \
           | xmllint --xpath "/Response/TimeZone/text()" - 2>/dev/null && echo)"
 
   # See if the curl failed
@@ -36,11 +37,11 @@ function update() {
   newTz="$(getTimezone)"
 
   # Skip if the new TZ is UTC (we probably messed up)
-  [[ "$newTz" == "UTC" ]] && return
+  [[ "$newTz" == "UTC" ]] && skipped "$SECTION" && return
 
   # Skip if the timezone didn't change
-  [[ "$oldTz" == "$newTz" ]] && return
-  
+  [[ "$oldTz" == "$newTz" ]] && skipped "$SECTION" && return
+
   section "$SECTION"
   tell timedatectl set-timezone "$newTz"
 
@@ -55,7 +56,7 @@ function install() {
 
   tell systemctl enable ntpd.service
   tell timedatectl set-timezone "$(getTimezone)"
-} 
+}
 
 # Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
