@@ -1,0 +1,3 @@
+~/.env/drive ~/drive/Programming/config
+~/.bin-dr ~/.env/drive/bin
+~/.local/share/fonts ~/.env/drive/fonts fc-cache

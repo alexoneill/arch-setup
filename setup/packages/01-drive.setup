@@ -1,6 +1,6 @@
 #!/bin/bash
-# 10-dropbox.setup
-# aoneill - 01/15/16
+# 01-drive.setup
+# aoneill - 12/26/16
 
 # Location of this script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,10 +14,10 @@ _SHOWN_SECTION=
 
 # Create the proper infrastructure
 function createFolders() {
-  if ! [[ -d "$(acc_get_home)/.data" ]]; then
+  if ! [[ -d "$(acc_get_home)/drive" ]]; then
     section "$SECTION"
-    tell mkdir -p $(acc_get_home)/.data
-    tell chown $user:$user -R "$(acc_get_home)/.data"
+    tell mkdir -p $(acc_get_home)/drive
+    tell chown $user:$user -R "$(acc_get_home)/drive"
   fi
 
   cat "$folder/links" | while IFS= read -r line; do
@@ -37,16 +37,11 @@ function createFolders() {
 
 # Enable the Dropbox daemon
 function enableDropbox() {
-  override="/etc/systemd/system/dropbox@$user.service.d/override.conf"
-  [[ "$(systemctl is-enabled dropbox@$user.service)" == "enabled" ]] && return
-  [[ -f "$override" && -z "$(diff "$folder/unit" "$override")" ]] && return
+  [[ "$(systemctl is-enabled insync@$user.service)" == "enabled" ]] && return
 
   section "$SECTION"
-  tell_eval \
-    "cat '$folder/unit' | EDITOR=tee systemctl edit dropbox@$user.service"
-
-  tell systemctl enable dropbox@$user.service
-  tell systemctl start dropbox@$user.service
+  tell systemctl enable insync@$user.service
+  tell systemctl start insync@$user.service
 }
 
 # General first steps
@@ -79,7 +74,7 @@ function install() {
   section "$SECTION"
 
   steps
-} 
+}
 
 # Execute $MODE (passing arguments) if we are not sourced
 EXEC=$(test "${BASH_SOURCE[0]}" != "${0}"; echo $?)
