@@ -10,7 +10,7 @@ function sourced() {
 
   export COMMON="$(cd "$DIR/../" && pwd)"
   export PACKAGES="$COMMON/packages"
-  export AIROOTFS="$COMMON/airootfs"
+  export ISO_SUPPORT="$COMMON/iso"
 
   export DATA="$BASE/data"
 

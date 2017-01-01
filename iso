@@ -7,6 +7,7 @@ SETUP="$DIR/setup"
 
 BUILD_DIR="$DIR/build"
 CACHE_DIR="$DIR/cache"
+CACHE_DB="cached.db.tar.gz"
 ARCHISO_BUILD_DIR="$BUILD_DIR/archiso"
 DIST_DIR="$ARCHISO_BUILD_DIR/airootfs/root/arch-setup"
 
@@ -99,6 +100,7 @@ function archiso() {
   tell_eval "find . -maxdepth 1  "\
     "-not -name '$(basename "$BUILD_DIR")' " \
     "-not -name '$(basename "$CACHE_DIR")' " \
+    "-not -name '*.iso' " \
     "-not -path '*.git*' " \
     "-not -name '$(basename "$0")' " \
     "-not -path . " \
@@ -109,8 +111,11 @@ function airootfs() {
   section airootfs
 
   dist="$(echo "$DIST_DIR" | sed -e "s|^.*airootfs/root/||g")"
-  tell_eval "cat <(echo 'DIST_DIR=$dist') '$CUSTOMIZE_PATH' >> " \
-    "'$ARCHISO_BUILD_DIR/airootfs/root/setup.sh'"
+  tell_eval "cat <(echo 'DIST_DIR=$dist') '$ISO_SUPPORT/airootfs/setup.sh' " \
+    ">> '$ARCHISO_BUILD_DIR/airootfs/root/setup.sh'"
+
+  # Copy the Pacman configuration
+  tell cp "$ISO_SUPPORT/pacman.conf" "$ARCHISO_BUILD_DIR/airootfs/etc/pacman.conf"
 }
 
 function packages() {
@@ -123,7 +128,9 @@ function packages() {
 
     dir="$PACKAGES/pacman"
     for file in $(find $dir -maxdepth 1 -type f | sort); do
-      tell pacman --noconfirm -Sw --cachedir "$CACHE_DIR" $(cat "$file")
+      # Get both the dependencies and the packages
+      pkgs="$(expac -S '%E' -l ' ' $(cat "$file")) $(cat "$file")"
+      tell pacman --noconfirm -Sw --cachedir "$CACHE_DIR" $pkgs
     done
 
     # Cache community packages
@@ -137,6 +144,20 @@ function packages() {
     cache="$ARCHISO_BUILD_DIR/airootfs/root/package_cache"
     tell mkdir -p "$cache"
     tell cp -v "$CACHE_DIR/*" "$cache/"
+
+    # Create a local database
+    tell repo-add "$cache/$CACHE_DB" "$cache/*"
+
+    # Copy standard databases
+    arch='x86_64'
+    mirror='https://mirrors.kernel.org/archlinux/'
+    dest="$ARCHISO_BUILD_DIR/airootfs/root/dbs/"
+
+    tell mkdir -p "$dest"
+    tell wget -P "$dest" "$mirror/community/os/$arch/community.db"
+    tell wget -P "$dest" "$mirror/core/os/$arch/core.db"
+    tell wget -P "$dest" "$mirror/extra/os/$arch/extra.db"
+    tell wget -P "$dest" "$mirror/multilib/os/$arch/multilib.db"
   fi
 }
 
@@ -151,7 +172,10 @@ function build() {
   cd "$DIR"
 
   # Copy it here and fix permissions
-  tell chown $SUDO_USER "$ARCHISO_BUILD_DIR/out/*.iso"
+  user="$(whoami)"
+  [ "$SUDO_USER" ] && user="$SUDO_USER"
+
+  tell chown $user "$ARCHISO_BUILD_DIR/out/*.iso"
   tell mv "$ARCHISO_BUILD_DIR/out/*.iso" "$DIR"
 
   # Optionally wipe the build directory (cache included)
@@ -184,7 +208,7 @@ function init() {
     return 1
   fi
 
-  CUSTOMIZE_PATH="$AIROOTFS/setup.sh"
+  CUSTOMIZE_PATH="$ISO_SUPPORT/airootfs/setup.sh"
 
   if ! [[ -d "/usr/share/archiso" ]]; then
     echo "error: \`archiso' not installed! Will not continue"
