@@ -1,6 +1,8 @@
 dmenu
 dosfstools
-i3
+i3-wm
+i3lock
+i3status
 openssh
 pacman
 slim

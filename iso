@@ -105,6 +105,9 @@ function archiso() {
     "-not -name '$(basename "$0")' " \
     "-not -path . " \
     "| xargs cp -rt '$DIST_DIR'"
+
+  # Remove i686 support
+  tell sed -i -e "s/i686//g" "$ARCHISO_BUILD_DIR/build.sh"
 }
 
 function airootfs() {
@@ -116,6 +119,10 @@ function airootfs() {
 
   # Copy the Pacman configuration
   tell cp "$ISO_SUPPORT/pacman.conf" "$ARCHISO_BUILD_DIR/airootfs/etc/pacman.conf"
+
+  # Add our customization options
+  tell_eval "cat '$ISO_SUPPORT/customize_airootfs.sh' " \
+    ">> '$ARCHISO_BUILD_DIR/airootfs/root/customize_airootfs.sh'"
 }
 
 function packages() {
@@ -127,11 +134,14 @@ function packages() {
     tell pacman --noconfirm -Sy
 
     dir="$PACKAGES/pacman"
+    packs="$(mktemp)"
     for file in $(find $dir -maxdepth 1 -type f | sort); do
       # Get both the dependencies and the packages
-      pkgs="$(expac -S '%E' -l ' ' $(cat "$file")) $(cat "$file")"
-      tell pacman --noconfirm -Sw --cachedir "$CACHE_DIR" $pkgs
+      cat "$file" | xargs -L 1 -- pactree -u >> "$packs"
     done
+
+    # Install
+    tell pacman --noconfirm -Sw --cachedir "$CACHE_DIR" $(sort "$packs" | uniq)
 
     # Cache community packages
     echo "Caching packages for pacaur..."
@@ -147,17 +157,6 @@ function packages() {
 
     # Create a local database
     tell repo-add "$cache/$CACHE_DB" "$cache/*"
-
-    # Copy standard databases
-    arch='x86_64'
-    mirror='https://mirrors.kernel.org/archlinux/'
-    dest="$ARCHISO_BUILD_DIR/airootfs/root/dbs/"
-
-    tell mkdir -p "$dest"
-    tell wget -P "$dest" "$mirror/community/os/$arch/community.db"
-    tell wget -P "$dest" "$mirror/core/os/$arch/core.db"
-    tell wget -P "$dest" "$mirror/extra/os/$arch/extra.db"
-    tell wget -P "$dest" "$mirror/multilib/os/$arch/multilib.db"
   fi
 }
 
