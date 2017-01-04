@@ -5,7 +5,7 @@ TABLE=gpt
 BOOT_SIZE=500
 SWAP_DIV=4
 
-function tell() { echo $@; } # $@ }
+function tell() { echo $@; $@; }
 
 function round_up() {
   [[ "$2" == "0" ]] && echo "$1"
@@ -17,6 +17,7 @@ function round_up() {
 }
 
 function confirm_parted() {
+  echo "Using $1..."
   parted $1 print
   echo -n "Continue (y/n)? "
   read cont
@@ -26,6 +27,13 @@ function confirm_parted() {
   fi
 
   return 0
+}
+
+function get_part() {
+  parted $1 print \
+    | grep "^ \+[0-9]" \
+    | tail -n 1 \
+    | sed -e "s|^ \+\([0-9]\+\).*$|\1|"
 }
 
 function mkpart() {
@@ -40,44 +48,45 @@ function mkpart() {
     fat16)      fs="fat -F 16" ;;
     fat32)      fs="fat -F 32" ;;
     hfs+)       fs=hfsplus ;;
-    *)          return 1 ;;
   esac
 
   # Make the filesystem
   tell parted -a optimal $dev mkpart $@ || return 1
-  num=$(parted $dev print \
-          | grep "^ \+[0-9]" \
-          | tail -n 1 \
-          | sed -e "s|^ \+\([0-9]\+\).*$|\1|")
 
   # Format it
+  num=$(get_part $dev)
   tell mkfs.${fs} ${dev}${num} || return 1
 
   # Name it (optional)
-  [[ -n $1 ]] && tell parted ${dev}${num} name $1
+  [[ -n $1 ]] && tell parted ${dev} ${num} name $1
 }
 
 function init() {
-  # Prompt for partitioning
-  fdisk -l | grep "Disk /dev"
-
   opt=$(dialog --menu "Partition Scheme:" --stdout 10 40 3 \
           0 'Linux Only' \
           1 'Linux and Windows' \
           2 'Linux, Windows and OSX')
 
+  # Leave if cancelled
   clear
   [[ -z $opt ]] && return 1
 
-  # Get the disk to partition
-  while true; do
-    echo -n "Which disk to partition (or \`skip'): "
-    read dev
+  if [[ "$(fdisk -l | grep "Disk /dev" | wc -l)" == "1" ]]; then
+    dev=$(fdisk -l | grep "Disk /dev" | sed -e "s|.*\(/dev/[a-z]\{3\}\).*|\1|")
+  else
+    # Display disks
+    fdisk -l | grep "Disk /dev"
 
-    if [[ $dev =~ ^/dev/sd[a-z]$ || "$dev" == "skip" ]]; then
-      break
-    fi
-  done
+    # Get the disk to partition
+    while true; do
+      echo -n "Which disk to partition (or \`skip'): "
+      read dev
+
+      if [[ $dev =~ ^/dev/sd[a-z]$ || "$dev" == "skip" ]]; then
+        break
+      fi
+    done
+  fi
 
   # Make sure the user wants to do this
   confirm_parted $dev || return 1
@@ -87,6 +96,8 @@ function init() {
 
   # Create boot area
   mkpart $dev boot fat32 0 "${BOOT_SIZE}M"
+  num=$(get_part $dev)
+  tell parted $dev $num set boot on
 
   # Calculate swap space
   ram="$(cat /proc/meminfo | grep MemTotal | awk -e '{ print $2 }')"
@@ -106,6 +117,7 @@ function init() {
 
   # Implement partition scheme
   # Linux
+  echo $opt
   if [[ "$opt" -ge "0" ]]; then
     mkpart $dev Arch ext4 "${end}M" "$((end + part))M"
     end=$((end + part))
@@ -113,7 +125,24 @@ function init() {
 
   # Windows
   if [[ "$opt" -ge "1" ]]; then
-    echo "win"
+    other=1000
+    wpart="$(echo "$part - 2 * $other" | bc)"
+
+    # Create main Windows partition
+    mkpart $dev Win ntfs "${end}M" "$((end + wpart))M"
+    end=$((end + wpart))
+
+    # Set flag
+    num=$(get_part $dev)
+    tell parted $dev $num set msftdata on
+
+    # Create reserved
+    mkpart $dev WinRes ntfs "${end}M" "$((end + other))M"
+    end=$((end + other))
+
+    # Set flag
+    num=$(get_part $dev)
+    tell parted $dev $num set msftres on
   fi
 
   # OSX
@@ -122,43 +151,8 @@ function init() {
     end=$((end + part))
   fi
 
-  return 1
-
-  # Partition and automatically format
-  if [[ "$dev" != "skip" ]]; then
-    parted $dev print
-    echo -n "Continue (y/n)? "
-    read cont
-    if [[ "$cont" != "y" ]]; then
-      echo "Aborting..."
-      return 1
-    fi
-
-    # Create a partition table
-    parted $dev mktable
-
-    tmp=$(temp)
-    parted $dev print \
-      | tail -n+8 \
-      | sed -e "/^\w*$/d" \
-      | awk -e '{print $5, $1}' \
-      | sed -e "/^ /d" \
-      | sed -e "s|\(.*\) \(.*\)|mkfs.\1 ${dev}\2|" \
-      | sort | uniq \
-      | tee ~/log \
-      | grep -v "^\s*$" \
-      | sed -e "s/mkfs\.linux-swap\((.*)\)\?/mkswap/" \
-      | sed -e "s/fat\([0-9]\+\)/fat -F \1/" \
-      | sed -e "s/hfs+/hfsplus/" \
-      | sed -e "s/\(.*\)/echo '\1'\n\1/" > $tmp
-
-    cat $tmp
-
-    rm $tmp
-    return 1
-  fi
-
-  return 1
+  # Make sure the user is satisfied
+  confirm_parted $dev || return 1
 
   cd $HOME/$DIST_DIR/
   ./configure
