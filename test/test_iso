@@ -1,0 +1,21 @@
+#!/bin/bash
+# test_iso
+# aoneill - 01/03/17
+
+# Create ISO
+[[ "$1" == "-c" ]] && ../iso
+
+# Move image from above
+[[ "$1" == "-c" ]] && mv ../*.iso .
+
+# Create a disk
+[[ -f disk.img ]] && rm disk.img
+qemu-img create -f raw disk.img 120G
+
+# Simulate
+qemu-system-x86_64 \
+  -enable-kvm \
+  -m 512 \
+  -cdrom *.iso \
+  -drive file=disk.img \
+  -boot order=dc

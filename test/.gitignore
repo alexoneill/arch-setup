@@ -1,0 +1,6 @@
+# .gitignore
+# aoneill - 07/26/16
+
+# Generated files
+disk.img
+*.iso
