@@ -45,24 +45,8 @@ function init() {
     return 1
   fi
 
-  # Try to connect to wifi
-  success=
-  for i in $(seq 0 2); do
-    # wifi-menu
-    success=$?
-    if [[ "$success" == "0" ]]; then
-      break;
-    else
-      echo "find /etc/netctl -maxdepth 1 -type f | xargs rm"
-    fi
-  done
-
-  if [[ "$success" == "1" ]]; then
-    echo "Whoops! You couldn't connect to the internet. Aborting..."
-    return 1
-  fi
-
   return 0
+
   cd $HOME/$DIST_DIR/
   ./configure
 }
