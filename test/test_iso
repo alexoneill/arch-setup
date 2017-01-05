@@ -6,6 +6,7 @@
 [[ "$1" == "-c" ]] && ../iso
 
 # Move image from above
+[[ "$1" == "-c" ]] && rm -f *.iso
 [[ "$1" == "-c" ]] && mv ../*.iso .
 
 # Create a disk
