@@ -8,6 +8,8 @@ SETUP="$DIR/setup"
 BUILD_DIR="$DIR/build"
 CACHE_DIR="$DIR/cache"
 CACHE_DB="cached.db.tar.gz"
+TEST_DIR="$DIR/test"
+DATA_DIR="$DIR/data"
 ARCHISO_BUILD_DIR="$BUILD_DIR/archiso"
 DIST_DIR="$ARCHISO_BUILD_DIR/airootfs/root/arch-setup"
 
@@ -97,14 +99,15 @@ function archiso() {
   # Copy this repo into the filesystem
   tell mkdir -p "$DIST_DIR"
 
-  tell_eval "find . -maxdepth 1  "\
+  tell_eval "find '$DIR' -maxdepth 1  "\
     "-not -name '$(basename "$BUILD_DIR")' " \
     "-not -name '$(basename "$CACHE_DIR")' " \
+    "-not -name '$(basename "$TEST_DIR")' " \
+    "-not -name '$(basename "$DATA_DIR")' " \
     "-not -name '*.iso' " \
     "-not -path '*.git*' " \
     "-not -name '$(basename "$0")' " \
-    "-not -path . " \
-    "| xargs cp -rt '$DIST_DIR'"
+    " | tail -n+2 | xargs cp -rt '$DIST_DIR'"
 
   # Remove i686 support
   tell sed -i -e "s/i686//g" "$ARCHISO_BUILD_DIR/build.sh"
@@ -141,14 +144,20 @@ function packages() {
     done
 
     # Install
-    tell pacman --noconfirm -Sw --cachedir "$CACHE_DIR" $(sort "$packs" | uniq)
+    tell pacman --noconfirm -Sw --cachedir "$CACHE_DIR" \
+      $(sort "$packs" | uniq)
 
     # Cache community packages
     echo "Caching packages for pacaur..."
     dir="$PACKAGES/pacaur"
+    aur_packs="$(mktemp)"
     for file in $(find $dir -maxdepth 1 -type f | sort); do
-      tell pacaur --aur --noconfirm -Syw --cachedir "$CACHE_DIR" $(cat "$file")
+      # Get both the dependencies and the packages
+      cat "$file" >> "$aur_packs"
     done
+
+    tell pacaur --aur --noconfirm -Syw --cachedir "$CACHE_DIR" \
+      $(sort "$aur_packs" | uniq)
 
     # Copy over the cached packages
     cache="$ARCHISO_BUILD_DIR/airootfs/root/package_cache"
@@ -157,6 +166,13 @@ function packages() {
 
     # Create a local database
     tell repo-add "$cache/$CACHE_DB" "$cache/*"
+
+    # Copy over package cache name to setup script
+    tmp="$(mktemp)"
+    tell_eval "cat <(echo 'PACK_CACHE=$(basename $CACHE_DIR)') " \
+      "'$ARCHISO_BUILD_DIR/airootfs/root/setup.sh' " \
+      "> '$tmp'"
+    tell mv "$tmp" "$ARCHISO_BUILD_DIR/airootfs/root/setup.sh"
   fi
 }
 
@@ -222,6 +238,7 @@ function init() {
 
   setup
 
+  # Infrastructure
   archiso
   airootfs
   packages
