@@ -197,6 +197,18 @@ function build() {
   (( CLEAN_BUILD )) && tell rm -rf "$BUILD_DIR"
 }
 
+function notify() {
+  # Make sure a notification system is present
+  command -v notify-send 2>&1 >/dev/null || return 1
+
+  [[ -n "$SUDO_USER" ]] && su $SUDO_USER -c \
+    'notify-send "Arch ISO" "Custom Arch ISO build complete" '`
+    `'--icon=utilities-terminal'
+  [[ -z "$SUDO_USER" ]] && \
+    notify-send 'Arch ISO' 'Custom Arch ISO build complete' \
+      --icon=utilities-terminal
+}
+
 function init() {
   # Populate variables
   local _args="$@"
@@ -244,6 +256,9 @@ function init() {
   packages
 
   build
+
+  # Notify of completion
+  notify
 }
 
 # Run init only when run
