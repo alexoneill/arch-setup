@@ -12,6 +12,7 @@ TEST_DIR="$DIR/test"
 DATA_DIR="$DIR/data"
 ARCHISO_BUILD_DIR="$BUILD_DIR/archiso"
 DIST_DIR="$ARCHISO_BUILD_DIR/airootfs/root/arch-setup"
+PACK_CACHE="$ARCHISO_BUILD_DIR/airootfs/root/package_cache"
 
 function args() {
   export CACHING=1
@@ -160,16 +161,15 @@ function packages() {
       $(sort "$aur_packs" | uniq)
 
     # Copy over the cached packages
-    cache="$ARCHISO_BUILD_DIR/airootfs/root/package_cache"
-    tell mkdir -p "$cache"
-    tell cp -v "$CACHE_DIR/*" "$cache/"
+    tell mkdir -p "$PACK_CACHE"
+    tell cp -v "$CACHE_DIR/*" "$PACK_CACHE/"
 
     # Create a local database
-    tell repo-add "$cache/$CACHE_DB" "$cache/*"
+    tell repo-add "$PACK_CACHE/$CACHE_DB" "$PACK_CACHE/*"
 
     # Copy over package cache name to setup script
     tmp="$(mktemp)"
-    tell_eval "cat <(echo 'PACK_CACHE=$(basename $CACHE_DIR)') " \
+    tell_eval "cat <(echo 'PACK_CACHE=$(basename $PACK_CACHE)') " \
       "'$ARCHISO_BUILD_DIR/airootfs/root/setup.sh' " \
       "> '$tmp'"
     tell mv "$tmp" "$ARCHISO_BUILD_DIR/airootfs/root/setup.sh"

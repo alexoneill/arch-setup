@@ -10,8 +10,8 @@
 [[ "$1" == "-c" ]] && mv ../*.iso .
 
 # Create a disk
-[[ -f disk.img ]] && rm disk.img
-qemu-img create -f raw disk.img 120G
+[[ "$1" == "-c" ]] && [[ -f disk.img ]] && rm disk.img
+[[ "$1" == "-c" ]] && qemu-img create -f raw disk.img 120G
 
 # Simulate
 qemu-system-x86_64 \

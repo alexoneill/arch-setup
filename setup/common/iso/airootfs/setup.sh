@@ -104,22 +104,16 @@ function init() {
   # Make sure the user wants to do this
   confirm_parted $dev || return 1
 
+  # Unmount previous partitions if possible
+  mount | grep -q "/mnt/boot" && umount /mnt/boot
+  mount | grep -q "/mnt" && umount /mnt
+
   if [[ "$opt" != "$DISK_PART_EXISTING" ]]; then
     # Create table
     tell parted $dev mktable $TABLE
 
-    # Get disk attributes
-    sdx=$(basename $dev)
-    block="/sys/block/$sdx"
-    optimal=$(cat "$block/queue/optimal_io_size")
-    blk_size=$(cat "$block/queue/physical_block_size")
-    offset=$(cat "$block/queue/alignment_offset")
-
-    # Get the proper start of the block
-    end="$(echo "($optimal + $offset) / $blk_size" | bc)"
-
     # Create boot area
-    mkpart $dev boot fat32 "${end}s" "${BOOT_SIZE}M"
+    mkpart $dev boot fat32 "0%" "${BOOT_SIZE}M"
     num=$(get_part $dev)
     tell parted $dev set $num boot on
 
@@ -181,6 +175,7 @@ function init() {
     # Mount the partitions
     # The third partition is Arch in each configuration, and boot is always first
     tell mount ${dev}3 "$CHROOT/" || return 1
+    tell mkdir -p "$CHROOT/boot" || return 1
     tell mount ${dev}1 "$CHROOT/boot" || return 1
   else
     # Get the boot and data partitions
