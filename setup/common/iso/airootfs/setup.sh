@@ -68,10 +68,10 @@ function mkpart() {
 }
 
 function init() {
-  opt=$(dialog --menu "Partition Scheme:" --stdout 10 40 4 \
+  opt=$(dialog --menu "Partition Scheme:" --stdout 12 40 4 \
           0 'Linux Only' \
           1 'Linux and Windows' \
-          2 'Linux, Windows and OSX'
+          2 'Linux, Windows and OSX' \
           $DISK_PART_EXISTING 'Existing')
 
   # Leave if cancelled
@@ -82,7 +82,7 @@ function init() {
   disks=$(mktemp)
   fdisk -l \
     | grep "Disk /dev" \
-    | sed -e "s|/dev/loop[0-9]\+|d" > $disks
+    | sed -e "/\/dev\/loop[0-9]\+/d" > $disks
 
   if [[ "$(cat $disks | wc -l)" == "1" ]]; then
     dev=$(cat $disks | sed -e "s|.*\(/dev/[a-z]\{3\}\).*|\1|")
