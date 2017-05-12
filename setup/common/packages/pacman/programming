@@ -8,5 +8,6 @@ texlive-core
 texlive-langextra
 texlive-langgreek
 texlive-latexextra
+texlive-fontsextra
 valgrind
 vim
